@@ -10,11 +10,11 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from system_agent.config import (
     AGENT_MAX_EXECUTION_TIME,
     AGENT_MAX_ITERATIONS,
+    AGENT_NAME,
     MEMORY_WINDOW_SIZE,
     MODEL_NAME,
     MODEL_TEMPERATURE,
 )
-
 from system_agent.tools.archive import ArchiveManager
 from system_agent.tools.database import DatabaseManager
 from system_agent.tools.email import EmailManager
@@ -31,7 +31,9 @@ class AIAgent:
 
     def __init__(self, model: str = MODEL_NAME):
         self.llm = ChatGoogleGenerativeAI(
-            model=model, temperature=MODEL_TEMPERATURE, convert_system_message_to_human=True
+            model=model,
+            temperature=MODEL_TEMPERATURE,
+            convert_system_message_to_human=True,
         )
 
         # Initialize all managers
@@ -58,9 +60,9 @@ class AIAgent:
             [
                 (
                     "system",
-                    """You are a helpful AI assistant powered by Google's Gemini model with access to various tools.
+                    f"""You are a helpful AI assistant powered by Google's Gemini model with access to various tools.
 Your creator's name: Hemang Gour
-Your name: ThinkPad
+Your name: {AGENT_NAME}
 
 You can:
 CAPABILITIES:

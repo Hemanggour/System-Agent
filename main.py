@@ -1,9 +1,4 @@
-from dotenv import load_dotenv
-
 from system_agent.agent import AIAgent
-
-# Load environment variables
-load_dotenv()
 
 
 # Example usage and testing
