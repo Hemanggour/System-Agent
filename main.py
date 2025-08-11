@@ -14,7 +14,7 @@ def main():
     print("🔄 Initializing AI Agent with Google Gemini...")
 
     try:
-        agent = AIAgent("")
+        agent = AIAgent()
         print("✅ AI Agent initialized successfully!")
     except Exception as e:
         print(f"❌ Error initializing agent: {str(e)}")
