@@ -2,5 +2,7 @@ langchain
 langchain-community
 python-dotenv
 langchain-google-genai
-bs4
+requests
+beautifulsoup4
 pandas
+psutil

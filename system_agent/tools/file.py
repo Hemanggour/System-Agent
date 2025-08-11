@@ -9,18 +9,14 @@ class FileManager:
     def read_file(file_path: str) -> str:
         """Read content from a file"""
         try:
-            # Ensure we have a valid file path
             if not file_path or file_path.strip() == "":
                 return "Error: No file path provided"
 
-            # Clean the file path
             file_path = file_path.strip()
 
-            # Check if file exists
             if not os.path.exists(file_path):
                 return f"Error: File '{file_path}' does not exist"
 
-            # Check if it's actually a file (not a directory)
             if not os.path.isfile(file_path):
                 return f"Error: '{file_path}' is not a file"
 
@@ -35,7 +31,6 @@ class FileManager:
             return f"Error: Permission denied to read file '{file_path}'"
         except UnicodeDecodeError:
             try:
-                # Try reading as binary and show first few bytes
                 with open(file_path, "rb") as f:
                     content = f.read()
                 return f"File '{file_path}' appears to be binary. Size: {len(content)} bytes"
@@ -46,24 +41,20 @@ class FileManager:
 
     @staticmethod
     def write_file(file_path: str, content: str, mode: str = "w") -> str:
-        """Write content to a file"""
+        """Write content to a file (if not exists create's new file)"""
         try:
-            # Ensure we have valid inputs
             if not file_path or file_path.strip() == "":
                 return "Error: No file path provided"
 
             file_path = file_path.strip()
 
-            # Create directory if it doesn't exist
             directory = os.path.dirname(file_path)
             if directory and not os.path.exists(directory):
                 os.makedirs(directory, exist_ok=True)
 
-            # Write the file
             with open(file_path, mode, encoding="utf-8") as f:
                 f.write(content)
 
-            # Verify the write was successful
             if os.path.exists(file_path):
                 file_size = os.path.getsize(file_path)
                 action = "appended to" if mode == "a" else "created/wrote to"
@@ -95,7 +86,6 @@ class FileManager:
 
             os.remove(file_path)
 
-            # Verify deletion
             if not os.path.exists(file_path):
                 return f"Successfully deleted file '{file_path}'"
             else:
@@ -126,7 +116,6 @@ class FileManager:
             if not items:
                 return f"Directory '{directory}' is empty"
 
-            # Separate files and directories
             files = []
             directories = []
 

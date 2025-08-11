@@ -2,64 +2,70 @@ from dotenv import load_dotenv
 
 from system_agent.agent import AIAgent
 
+
 # Load environment variables
 load_dotenv()
 
 
 # Example usage and testing
 def main():
-    """Main function to run the AI agent"""
-    # Initialize the agent (you need to set your GOOGLE_API_KEY in env)
-
-    print("🔄 Initializing AI Agent with Google Gemini...")
-
+    """Main function to run the AI Agent"""
+    print("=== AI Agent System ===")
+    print("Powered by Google Gemini with LangChain")
+    print("Type 'quit', 'exit', or 'bye' to stop")
+    print("Type 'memory' to see conversation history")
+    print("Type 'clear' to clear conversation memory")
+    print("-" * 50)
+    
+    # Initialize agent
     try:
         agent = AIAgent()
         print("✅ AI Agent initialized successfully!")
+        print("\nAvailable capabilities:")
+        print("- File operations (read, write, delete, list)")
+        print("- Web scraping and link extraction")
+        print("- System commands and monitoring")
+        print("- Database operations (SQLite)")
+        print("- Email sending with attachments")
+        print("- Archive creation and extraction")
+        print("- Network operations (ping, download)")
+        print("- Security operations (hashing, duplicate detection)")
+        print("- Task scheduling")
+        print("\n" + "=" * 50)
     except Exception as e:
-        print(f"❌ Error initializing agent: {str(e)}")
+        print(f"❌ Error initializing agent: {e}")
         return
-
-    print("\n" + "=" * 60)
-    print("🤖 AI AGENT WITH GOOGLE GEMINI")
-    print("=" * 60)
-    print(agent.get_capabilities())
-    print("\n📝 SPECIAL COMMANDS:")
-    print("   • Type 'quit' or 'exit' to stop")
-    print("   • Type 'memory' to see conversation history")
-    print("   • Type 'clear' to clear memory")
-    print("   • Type 'help' to see capabilities again")
-    print("=" * 60)
-
+    
+    # Main interaction loop
     while True:
         try:
-            user_input = input("\n💬 You: ").strip()
+            user_input = input("\n🤖 You: ").strip()
+            
+            if not user_input:
+                continue
 
-            if user_input.lower() in ["quit", "exit"]:
-                print("\n👋 Goodbye! Thanks for using the AI Agent.")
-                break
-            elif user_input.lower() == "memory":
+            if user_input.lower() == "memory":
                 print("\n" + agent.get_memory_summary())
                 continue
-            elif user_input.lower() == "clear":
-                print("\n" + agent.clear_memory())
+            
+            if user_input.lower() == 'clear':
+                result = agent.clear_memory()
+                print(f"🧹 {result}")
                 continue
-            elif user_input.lower() == "help":
-                print(agent.get_capabilities())
-                continue
-            elif not user_input:
-                continue
-
-            print("\n🤖 AI Agent: ", end="")
-            response = agent.chat(user_input)
-            print(response)
-
+            
+            if user_input.lower() in ['quit', 'exit', 'bye']:
+                print("👋 Goodbye!")
+                break
+            
+            print("\n🔄 Processing your request...")
+            response = agent.run(user_input)
+            print(f"\n🤖 Agent: {response}")
+            
         except KeyboardInterrupt:
-            print("\n\n👋 Goodbye! (Interrupted by user)")
+            print("\n\n👋 Goodbye!")
             break
         except Exception as e:
-            print(f"\n❌ Unexpected error: {str(e)}")
-            print("Please try again or type 'quit' to exit.")
+            print(f"\n❌ An error occurred: {e}")
 
 
 if __name__ == "__main__":

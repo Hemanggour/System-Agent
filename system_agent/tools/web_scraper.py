@@ -17,17 +17,14 @@ class WebScraper:
 
             soup = BeautifulSoup(response.content, "html.parser")
 
-            # Remove script and style elements
             for script in soup(["script", "style"]):
                 script.decompose()
 
-            # Get text content
             text = soup.get_text()
             lines = (line.strip() for line in text.splitlines())
             chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
             text = " ".join(chunk for chunk in chunks if chunk)
 
-            # Limit text length to avoid overwhelming the model
             if len(text) > 5000:
                 text = text[:5000] + "...\n[Content truncated]"
 
@@ -57,9 +54,7 @@ class WebScraper:
                     links.append(f"{text}: {href}")
 
             if links:
-                return f"Links found on '{url}':\n" + "\n".join(
-                    links[:20]
-                )  # Limit to first 20 links
+                return f"Links found on '{url}':\n" + "\n".join(links[:20])
             else:
                 return f"No links found on '{url}'"
         except Exception as e:
