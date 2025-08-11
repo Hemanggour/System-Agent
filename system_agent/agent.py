@@ -7,6 +7,14 @@ from langchain.schema import HumanMessage
 from langchain.tools import Tool
 from langchain_google_genai import ChatGoogleGenerativeAI
 
+from system_agent.config import (
+    AGENT_MAX_EXECUTION_TIME,
+    AGENT_MAX_ITERATIONS,
+    AGENT_NAME,
+    MEMORY_WINDOW_SIZE,
+    MODEL_NAME,
+    MODEL_TEMPERATURE,
+)
 from system_agent.tools.archive import ArchiveManager
 from system_agent.tools.database import DatabaseManager
 from system_agent.tools.email import EmailManager
@@ -21,9 +29,11 @@ from system_agent.tools.web_scraper import WebScraper
 class AIAgent:
     """Main AI Agent class with LangChain and Google Gemini integration"""
 
-    def __init__(self, model: str = "gemini-2.5-flash-lite"):
+    def __init__(self, model: str = MODEL_NAME):
         self.llm = ChatGoogleGenerativeAI(
-            model=model, temperature=0.7, convert_system_message_to_human=True
+            model=model,
+            temperature=MODEL_TEMPERATURE,
+            convert_system_message_to_human=True,
         )
 
         # Initialize all managers
@@ -40,9 +50,9 @@ class AIAgent:
         # Create tools
         self.tools = self._create_tools()
 
-        # Create memory with window of 10 messages
+        # Create memory with configurable window size
         self.memory = ConversationBufferWindowMemory(
-            k=20, memory_key="chat_history", return_messages=True
+            k=MEMORY_WINDOW_SIZE, memory_key="chat_history", return_messages=True
         )
 
         # Create prompt template optimized for Gemini
@@ -50,8 +60,11 @@ class AIAgent:
             [
                 (
                     "system",
-                    """You are a helpful AI assistant powered by Google's Gemini model with access to various tools. You can:
+                    f"""You are a helpful AI assistant powered by Google's Gemini model with access to various tools.
+Your creator's name: Hemang Gour
+Your name: {AGENT_NAME}
 
+You can:
 CAPABILITIES:
 1. File Operations: Read, write, modify, delete files and manage directories
 2. Web Operations: Scrape websites, extract links, download files
@@ -93,8 +106,8 @@ Available tools: read_file, write_file, append_to_file, delete_file, list_files,
             memory=self.memory,
             verbose=True,
             handle_parsing_errors=True,
-            max_iterations=15,
-            max_execution_time=60,
+            max_iterations=AGENT_MAX_ITERATIONS,
+            max_execution_time=AGENT_MAX_EXECUTION_TIME,
         )
 
     def _create_tools(self) -> List[Tool]:

@@ -1,6 +1,13 @@
 import requests
 from bs4 import BeautifulSoup
 
+from system_agent.config import (
+    WEB_CONTENT_LIMIT,
+    WEB_LINKS_LIMIT,
+    WEB_REQUEST_TIMEOUT,
+    WEB_USER_AGENT,
+)
+
 
 class WebScraper:
     """Handles web scraping operations"""
@@ -9,10 +16,8 @@ class WebScraper:
     def scrape_url(url: str) -> str:
         """Scrape content from a URL"""
         try:
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"  # noqa
-            }
-            response = requests.get(url, headers=headers, timeout=10)
+            headers = {"User-Agent": WEB_USER_AGENT}
+            response = requests.get(url, headers=headers, timeout=WEB_REQUEST_TIMEOUT)
             response.raise_for_status()
 
             soup = BeautifulSoup(response.content, "html.parser")
@@ -25,8 +30,8 @@ class WebScraper:
             chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
             text = " ".join(chunk for chunk in chunks if chunk)
 
-            if len(text) > 5000:
-                text = text[:5000] + "...\n[Content truncated]"
+            if len(text) > WEB_CONTENT_LIMIT:
+                text = text[:WEB_CONTENT_LIMIT] + "...\n[Content truncated]"
 
             return f"Successfully scraped '{url}':\n{text}"
         except requests.RequestException as e:
@@ -54,7 +59,7 @@ class WebScraper:
                     links.append(f"{text}: {href}")
 
             if links:
-                return f"Links found on '{url}':\n" + "\n".join(links[:20])
+                return f"Links found on '{url}':\n" + "\n".join(links[:WEB_LINKS_LIMIT])
             else:
                 return f"No links found on '{url}'"
         except Exception as e:

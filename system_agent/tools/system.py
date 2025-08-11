@@ -3,6 +3,8 @@ import subprocess
 
 import psutil
 
+from system_agent.config import COMMAND_TIMEOUT, DANGEROUS_COMMANDS
+
 
 class SystemManager:
     """Handles system-level operations"""
@@ -11,24 +13,15 @@ class SystemManager:
     def execute_command(command: str) -> str:
         """Execute shell/system commands safely"""
         try:
-            dangerous_commands = [
-                "rm -rf /",
-                "del /f /s /q",
-                "format",
-                "mkfs",
-                "dd if=",
-                "shutdown",
-                "reboot",
-                "halt",
-                "sudo rm",
-                "rm -rf *",
-            ]
-
-            if any(dangerous in command.lower() for dangerous in dangerous_commands):
+            if any(dangerous in command.lower() for dangerous in DANGEROUS_COMMANDS):
                 return "Error: Dangerous command blocked for security reasons"
 
             result = subprocess.run(
-                command, shell=True, capture_output=True, text=True, timeout=30
+                command,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=COMMAND_TIMEOUT,
             )
 
             output = ""

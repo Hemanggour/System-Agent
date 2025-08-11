@@ -3,6 +3,8 @@ import subprocess
 
 import requests
 
+from system_agent.config import DOWNLOAD_CHUNK_SIZE, DOWNLOAD_TIMEOUT, PING_COUNT
+
 
 class NetworkManager:
     """Handles network operations"""
@@ -13,11 +15,15 @@ class NetworkManager:
         try:
             if os.name == "nt":
                 result = subprocess.run(
-                    ["ping", "-n", "4", host], capture_output=True, text=True
+                    ["ping", "-n", str(PING_COUNT), host],
+                    capture_output=True,
+                    text=True,
                 )
             else:
                 result = subprocess.run(
-                    ["ping", "-c", "4", host], capture_output=True, text=True
+                    ["ping", "-c", str(PING_COUNT), host],
+                    capture_output=True,
+                    text=True,
                 )
 
             return f"Ping results for {host}:\n{result.stdout}"
@@ -28,11 +34,11 @@ class NetworkManager:
     def download_file(url: str, save_path: str) -> str:
         """Download file from URL"""
         try:
-            response = requests.get(url, stream=True, timeout=30)
+            response = requests.get(url, stream=True, timeout=DOWNLOAD_TIMEOUT)
             response.raise_for_status()
 
             with open(save_path, "wb") as f:
-                for chunk in response.iter_content(chunk_size=8192):
+                for chunk in response.iter_content(chunk_size=DOWNLOAD_CHUNK_SIZE):
                     f.write(chunk)
 
             file_size = os.path.getsize(save_path)

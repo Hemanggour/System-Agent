@@ -5,6 +5,16 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+from system_agent.config import (
+    EMAIL_DEFAULT_SENDER,
+    EMAIL_PASSWORD,
+    EMAIL_TIMEOUT,
+    EMAIL_USE_SSL,
+    EMAIL_USE_TLS,
+    SMTP_PORT,
+    SMTP_SERVER,
+)
+
 
 class EmailManager:
     """Handles email operations"""
@@ -15,10 +25,8 @@ class EmailManager:
     ) -> str:
         """Send email with optional attachment"""
         try:
-            smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
-            smtp_port = int(os.getenv("SMTP_PORT", "587"))
-            email_user = os.getenv("EMAIL_USER")
-            email_password = os.getenv("EMAIL_PASSWORD")
+            email_user = EMAIL_DEFAULT_SENDER
+            email_password = EMAIL_PASSWORD
 
             if not email_user or not email_password:
                 return "Error: EMAIL_USER and EMAIL_PASSWORD environment variables required"
@@ -42,8 +50,14 @@ class EmailManager:
                 )
                 msg.attach(part)
 
-            server = smtplib.SMTP(smtp_server, smtp_port)
-            server.starttls()
+            # Create appropriate SMTP connection based on settings
+            if EMAIL_USE_SSL:
+                server = smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, timeout=EMAIL_TIMEOUT)
+            else:
+                server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=EMAIL_TIMEOUT)
+                if EMAIL_USE_TLS:
+                    server.starttls()
+
             server.login(email_user, email_password)
             server.sendmail(email_user, to_email, msg.as_string())
             server.quit()

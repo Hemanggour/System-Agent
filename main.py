@@ -1,10 +1,4 @@
-from dotenv import load_dotenv
-
 from system_agent.agent import AIAgent
-
-
-# Load environment variables
-load_dotenv()
 
 
 # Example usage and testing
@@ -16,7 +10,7 @@ def main():
     print("Type 'memory' to see conversation history")
     print("Type 'clear' to clear conversation memory")
     print("-" * 50)
-    
+
     # Initialize agent
     try:
         agent = AIAgent()
@@ -35,32 +29,32 @@ def main():
     except Exception as e:
         print(f"❌ Error initializing agent: {e}")
         return
-    
+
     # Main interaction loop
     while True:
         try:
             user_input = input("\n🤖 You: ").strip()
-            
+
             if not user_input:
                 continue
 
             if user_input.lower() == "memory":
                 print("\n" + agent.get_memory_summary())
                 continue
-            
-            if user_input.lower() == 'clear':
+
+            if user_input.lower() == "clear":
                 result = agent.clear_memory()
                 print(f"🧹 {result}")
                 continue
-            
-            if user_input.lower() in ['quit', 'exit', 'bye']:
+
+            if user_input.lower() in ["quit", "exit", "bye"]:
                 print("👋 Goodbye!")
                 break
-            
+
             print("\n🔄 Processing your request...")
             response = agent.run(user_input)
             print(f"\n🤖 Agent: {response}")
-            
+
         except KeyboardInterrupt:
             print("\n\n👋 Goodbye!")
             break
