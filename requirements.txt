@@ -1,0 +1,6 @@
+langchain
+langchain-community
+python-dotenv
+langchain-google-genai
+bs4
+pandas
