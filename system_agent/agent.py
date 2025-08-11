@@ -33,7 +33,6 @@ class AIAgent:
         self.llm = ChatGoogleGenerativeAI(
             model=model,
             temperature=MODEL_TEMPERATURE,
-            convert_system_message_to_human=True,
         )
 
         # Initialize all managers
@@ -116,7 +115,7 @@ Available tools: read_file, write_file, append_to_file, delete_file, list_files,
             # File Operations
             Tool(
                 name="read_file",
-                description="Read content from a file. Input: file_path (string). Example: 'notes.txt'",  # noqa
+                description="Read content from a file. Input: file_path (string). You can use relative paths from workspace root or absolute paths within workspace. Examples: 'notes.txt', 'docs/example.md'",  # noqa
                 func=self.file_manager.read_file,
             ),
             Tool(
@@ -342,8 +341,17 @@ Available tools: read_file, write_file, append_to_file, delete_file, list_files,
         try:
             response = self.agent_executor.invoke({"input": user_input})
             return response["output"]
+
         except Exception as e:
-            return f"Error processing request: {str(e)}"
+            error_msg = str(e)
+            if "Rate limit" in error_msg:
+                return "Rate limit exceeded. Please wait a moment before trying again."
+            elif "No such file" in error_msg or "FileNotFoundError" in error_msg:
+                return "The specified file could not be found. Please check if the file exists and the path is correct."
+            elif "Permission" in error_msg:
+                return "Access denied. I don't have permission to access this file or directory."
+            else:
+                return f"Error processing request: {error_msg}"
 
     def get_memory_summary(self) -> str:
         """Get a summary of the conversation memory"""

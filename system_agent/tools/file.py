@@ -1,9 +1,32 @@
 import os
 from datetime import datetime
+from pathlib import Path
 
 
 class FileManager:
     """Handles file operations with proper error handling and path management"""
+    
+    @staticmethod
+    def _normalize_path(file_path: str) -> str:
+        """Normalize file path and ensure it's within workspace"""
+        # Get the workspace root directory
+        workspace_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+        
+        # Convert to absolute path if relative
+        if not os.path.isabs(file_path):
+            file_path = os.path.join(workspace_root, file_path)
+        
+        # Normalize path
+        normalized_path = os.path.normpath(os.path.abspath(file_path))
+        
+        # Check if path is within workspace
+        if not normalized_path.startswith(workspace_root):
+            raise ValueError(
+                f"Access denied: Cannot access files outside the workspace. "
+                f"Please use paths within {workspace_root}"
+            )
+        
+        return normalized_path
 
     @staticmethod
     def read_file(file_path: str) -> str:
@@ -12,7 +35,11 @@ class FileManager:
             if not file_path or file_path.strip() == "":
                 return "Error: No file path provided"
 
-            file_path = file_path.strip()
+            try:
+                file_path = FileManager._normalize_path(file_path.strip())
+
+            except ValueError as e:
+                return str(e)
 
             if not os.path.exists(file_path):
                 return f"Error: File '{file_path}' does not exist"
