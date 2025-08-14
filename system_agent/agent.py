@@ -1,5 +1,5 @@
-import os
 import json
+import os
 from typing import List
 
 from langchain.agents import AgentExecutor, create_tool_calling_agent
@@ -248,10 +248,9 @@ Options JSON can contain:
 Examples:
 - "function"
 - "TODO|||/path/to/project"
-- "error|||/logs|||{\"file_pattern\": \"*.log\", \"ignore_case\": false}"
-""",
-func=self._search_string_in_files_wrapper
-            )
+- "error|||/logs|||{\"file_pattern\": \"*.log\", \"ignore_case\": false}\"""",  # noqa
+                func=self._search_string_in_files_wrapper,
+            ),
         ]
 
         return tools
@@ -265,7 +264,7 @@ func=self._search_string_in_files_wrapper
         - search_string: The string to search for (required)
         - directory: Directory to search in (optional, defaults to current directory)
         - options_json: JSON string with search options (optional)
-        
+
         Options JSON can contain:
         - file_pattern: File pattern to match (default: "*")
         - ignore_case: Case-insensitive search (default: true)
@@ -273,7 +272,7 @@ func=self._search_string_in_files_wrapper
         - max_file_size_mb: Skip files larger than this MB (default: 100)
         - max_results: Maximum results to return (default: 50)
         - use_memory_mapping: Use memory mapping (default: true)
-        
+
         Examples:
         - "function"
         - "TODO|||/path/to/project"
@@ -282,50 +281,57 @@ func=self._search_string_in_files_wrapper
         try:
             # Parse input
             parts = input_str.split("|||")
-            
+
             if len(parts) < 1 or not parts[0].strip():
                 return "Error: Search string is required"
-            
+
             search_string = parts[0].strip()
-            directory = parts[1].strip() if len(parts) > 1 and parts[1].strip() else None
-            options_str = parts[2].strip() if len(parts) > 2 and parts[2].strip() else "{}"
-            
+            directory = (
+                parts[1].strip() if len(parts) > 1 and parts[1].strip() else None
+            )
+            options_str = (
+                parts[2].strip() if len(parts) > 2 and parts[2].strip() else "{}"
+            )
+
             # Parse options
             try:
                 options = json.loads(options_str)
             except json.JSONDecodeError as e:
                 return f"Error: Invalid JSON in options: {str(e)}"
-            
+
             # Set default options
             search_options = {
-                'file_pattern': options.get('file_pattern', '*'),
-                'ignore_case': options.get('ignore_case', True),
-                'max_workers': options.get('max_workers', 4),
-                'max_file_size_mb': options.get('max_file_size_mb', 100),
-                'use_memory_mapping': options.get('use_memory_mapping', True),
+                "file_pattern": options.get("file_pattern", "*"),
+                "ignore_case": options.get("ignore_case", True),
+                "max_workers": options.get("max_workers", 4),
+                "max_file_size_mb": options.get("max_file_size_mb", 100),
+                "use_memory_mapping": options.get("use_memory_mapping", True),
             }
-            
-            max_results = options.get('max_results', 50)
-            
+
+            max_results = options.get("max_results", 50)
+
             # Validate directory
             if directory and not os.path.exists(directory):
                 return f"Error: Directory '{directory}' does not exist"
-            
+
             # Validate max_workers
-            if not isinstance(search_options['max_workers'], int) or search_options['max_workers'] < 1:
-                search_options['max_workers'] = 4
-            
+            if (
+                not isinstance(search_options["max_workers"], int)
+                or search_options["max_workers"] < 1
+            ):
+                search_options["max_workers"] = 4
+
             # Perform search
             results = self.file_manager.search_string_in_files(
-                search_string=search_string,
-                directory=directory,
-                **search_options
+                search_string=search_string, directory=directory, **search_options
             )
-            
+
             # Handle empty results
             if not results:
-                return f"No matches found for '{search_string}'" + (f" in directory '{directory}'" if directory else "")
-            
+                return f"No matches found for '{search_string}'" + (
+                    f" in directory '{directory}'" if directory else ""
+                )
+
             # Limit results if needed
             original_count = len(results)
             if len(results) > max_results:
@@ -333,39 +339,40 @@ func=self._search_string_in_files_wrapper
                 truncated = True
             else:
                 truncated = False
-            
+
             # Format results using print_search_results format
             output_lines = []
-            
+
             # Header with count
             output_lines.append(f"Found {original_count} matches:")
             output_lines.append("-" * 50)
-            
+
             # Results in print_search_results format
             for result in results:
                 # File path with line number (same format as print_search_results)
-                file_info = result['relative_path']
-                if result.get('line_number'):
-                    file_info += f"\n\tline no.: {result['line_number']}"
-                
+                file_info = result["relative_path"]
+                if result.get("line_number"):
+                    file_info += f"\n- line no.: {result['line_number']}"
+
                 # File info line
                 output_lines.append(file_info)
-                
+
                 # Content line with indentation (same as print_search_results)
-                output_lines.append(f"\t{result['line_content']}")
-                
+                output_lines.append(f"- {result['line_content']}")
+
                 # Empty line for readability (same as print_search_results)
                 output_lines.append("")
-            
+
             # Add truncation notice if needed
             if truncated:
-                output_lines.append(f"... and {original_count - max_results} more matches")
-            
+                output_lines.append(
+                    f"... and {original_count - max_results} more matches"
+                )
+
             return "\n".join(output_lines)
-            
+
         except Exception as e:
             return f"Error during search: {str(e)}"
-
 
     # Wrapper functions for tools that need input parsing
     def _write_file_wrapper(self, input_str: str) -> str:

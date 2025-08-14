@@ -230,6 +230,8 @@ class FileManager:
             """Search using memory mapping - fastest for larger files."""
             results = []
 
+            file_path = FileManager._normalize_path(file_path.strip())
+
             try:
                 with open(file_path, "rb") as f:
                     with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
