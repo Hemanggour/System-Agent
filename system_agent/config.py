@@ -59,6 +59,7 @@ DOWNLOAD_TIMEOUT = int(os.getenv("DOWNLOAD_TIMEOUT", "30"))
 
 # Agent Configuration
 AGENT_NAME = os.getenv("AGENT_NAME", "ThinkPad")
+VERBOSE = os.getenv("VERBOSE", "True").lower() == "true"
 AGENT_MAX_ITERATIONS = int(os.getenv("AGENT_MAX_ITERATIONS", "15"))
 AGENT_MAX_EXECUTION_TIME = int(os.getenv("AGENT_MAX_EXECUTION_TIME", "60"))
 
@@ -224,11 +225,13 @@ def get_all_config() -> Dict[str, Any]:
             "download_timeout": DOWNLOAD_TIMEOUT,
         },
         "file": {
+            "disable_smart_ignore": DISABLE_SMART_IGNORE,
             "ignore_dirs": DEFAULT_IGNORE_DIRS,
             "ignore_files": DEFAULT_IGNORE_FILES,
         },
         "agent": {
             "name": AGENT_NAME,
+            "verbose": VERBOSE,
             "max_iterations": AGENT_MAX_ITERATIONS,
             "max_execution_time": AGENT_MAX_EXECUTION_TIME,
         },

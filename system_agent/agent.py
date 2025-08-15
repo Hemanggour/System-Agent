@@ -12,6 +12,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from system_agent.config import (
     AGENT_MAX_EXECUTION_TIME,
     AGENT_MAX_ITERATIONS,
+    VERBOSE,
     AGENT_NAME,
     DISABLE_SMART_IGNORE,
     MEMORY_WINDOW_SIZE,
@@ -69,6 +70,7 @@ Your name: {AGENT_NAME}
 INSTRUCTIONS:
 - If any task given then first create a proper flow plan of that task.
 - Always extract all information returned from tools results.
+- If any instructions are unclear ask the user before proceed.
 - Use the available tools when needed to complete tasks
 - Always provide clear, helpful, and detailed responses
 - When working with files, specify full paths and handle errors gracefully
@@ -93,7 +95,7 @@ INSTRUCTIONS:
             agent=self.agent,
             tools=self.tools,
             memory=self.memory,
-            verbose=True,
+            verbose=VERBOSE,
             handle_parsing_errors=True,
             max_iterations=AGENT_MAX_ITERATIONS,
             max_execution_time=AGENT_MAX_EXECUTION_TIME,
@@ -240,8 +242,8 @@ Examples:
             ),
             Tool(
                 name="duckduckgo_search",
-                func=self.web_scraper.duckduckgo_search,
                 description="Search the web using DuckDuckGo for real-time information.",
+                func=self.web_scraper.duckduckgo_search,
             ),
         ]
 
