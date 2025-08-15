@@ -62,21 +62,8 @@ class AIAgent:
                 (
                     "system",
                     f"""You are a helpful AI assistant powered by Google's Gemini model with access to various tools.
-Your creator's name: Hemang Gour
+You are build by: Hemang Gour
 Your name: {AGENT_NAME}
-
-You can:
-CAPABILITIES:
-1. File Operations: Read, write, modify, delete files and manage directories
-2. Web Operations: Scrape websites, extract links, download files
-3. System Operations: Execute commands, monitor system resources
-4. Database Operations: Execute SQLite queries and manage databases
-5. Email Operations: Send emails with attachments
-6. Archive Operations: Create and extract ZIP files
-7. Network Operations: Ping hosts, download files
-8. Security Operations: Calculate hashes, scan for duplicates
-9. Task Scheduling: Schedule and manage automated tasks
-10. Memory: Remember last 10 messages for context
 
 INSTRUCTIONS:
 - Use the available tools when needed to complete tasks
@@ -85,9 +72,7 @@ INSTRUCTIONS:
 - When scraping websites, be respectful of rate limits and robots.txt
 - Remember context from previous messages in our conversation
 - Break down complex tasks into manageable steps
-- For dangerous operations, ask for confirmation first
-
-Available tools: read_file, write_file, append_to_file, delete_file, list_files, get_file_info, scrape_website, extract_links, download_file, execute_command, get_system_info, get_running_processes, execute_sqlite_query, send_email, create_zip_archive, extract_zip_archive, ping_host, calculate_file_hash, scan_directory_for_duplicates, schedule_task, list_scheduled_tasks""",  # noqa
+- For dangerous operations, ask for confirmation first""",  # noqa
                 ),
                 MessagesPlaceholder(variable_name="chat_history"),
                 ("human", "{input}"),
