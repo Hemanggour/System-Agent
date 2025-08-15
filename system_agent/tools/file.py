@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from typing import List, Set
 
-from system_agent.config import DEFAULT_IGNORE_DIRS, DEFAULT_IGNORE_FILES
+from system_agent.config import DEFAULT_IGNORE_DIRS, DEFAULT_IGNORE_FILES, DISABLE_SMART_IGNORE
 
 
 class FileManager:
@@ -212,7 +212,7 @@ class FileManager:
         max_workers=4,
         max_file_size_mb=100,
         use_memory_mapping=True,
-        disable_smart_ignore=False,
+        disable_smart_ignore=DISABLE_SMART_IGNORE,
         custom_ignore_patterns=None,
         additional_ignore_dirs=None,
         additional_ignore_files=None,

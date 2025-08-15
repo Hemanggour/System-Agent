@@ -16,6 +16,7 @@ from system_agent.config import (
     MEMORY_WINDOW_SIZE,
     MODEL_NAME,
     MODEL_TEMPERATURE,
+    DISABLE_SMART_IGNORE,
 )
 from system_agent.tools.archive import ArchiveManager
 from system_agent.tools.database import DatabaseManager
@@ -297,7 +298,7 @@ Examples:
                 "max_workers": options.get("max_workers", 4),
                 "max_file_size_mb": options.get("max_file_size_mb", 100),
                 "use_memory_mapping": options.get("use_memory_mapping", True),
-                "disable_smart_ignore": options.get("disable_smart_ignore", False),
+                "disable_smart_ignore": options.get("disable_smart_ignore", DISABLE_SMART_IGNORE),
                 "custom_ignore_patterns": options.get("custom_ignore_patterns", []),
                 "additional_ignore_dirs": options.get("additional_ignore_dirs", []),
                 "additional_ignore_files": options.get("additional_ignore_files", []),

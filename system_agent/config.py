@@ -64,6 +64,8 @@ AGENT_MAX_EXECUTION_TIME = int(os.getenv("AGENT_MAX_EXECUTION_TIME", "60"))
 
 
 # Default directories and files to ignore
+DISABLE_SMART_IGNORE = False
+
 DEFAULT_IGNORE_DIRS = {
     # Virtual environments
     "venv",
