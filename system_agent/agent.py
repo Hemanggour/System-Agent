@@ -13,10 +13,10 @@ from system_agent.config import (
     AGENT_MAX_EXECUTION_TIME,
     AGENT_MAX_ITERATIONS,
     AGENT_NAME,
+    DISABLE_SMART_IGNORE,
     MEMORY_WINDOW_SIZE,
     MODEL_NAME,
     MODEL_TEMPERATURE,
-    DISABLE_SMART_IGNORE,
 )
 from system_agent.tools.archive import ArchiveManager
 from system_agent.tools.database import DatabaseManager
@@ -238,6 +238,11 @@ Examples:
 - "error|||/logs|||{\"file_pattern\": \"*.log\", \"ignore_case\": false}\"""",  # noqa
                 func=self._search_string_in_files_wrapper,
             ),
+            Tool(
+                name="duckduckgo_search",
+                func=self.web_scraper.duckduckgo_search,
+                description="Search the web using DuckDuckGo for real-time information.",
+            ),
         ]
 
         return tools
@@ -300,7 +305,9 @@ Examples:
                 "max_workers": options.get("max_workers", 4),
                 "max_file_size_mb": options.get("max_file_size_mb", 100),
                 "use_memory_mapping": options.get("use_memory_mapping", True),
-                "disable_smart_ignore": options.get("disable_smart_ignore", DISABLE_SMART_IGNORE),
+                "disable_smart_ignore": options.get(
+                    "disable_smart_ignore", DISABLE_SMART_IGNORE
+                ),
                 "custom_ignore_patterns": options.get("custom_ignore_patterns", []),
                 "additional_ignore_dirs": options.get("additional_ignore_dirs", []),
                 "additional_ignore_files": options.get("additional_ignore_files", []),

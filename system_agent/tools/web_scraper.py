@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from ddgs import DDGS
 
 from system_agent.config import (
     WEB_CONTENT_LIMIT,
@@ -64,3 +65,14 @@ class WebScraper:
                 return f"No links found on '{url}'"
         except Exception as e:
             return f"Error extracting links from '{url}': {str(e)}"
+
+    @staticmethod
+    def duckduckgo_search(query: str, max_results: int = 5) -> str:
+        """Search the web using DuckDuckGo for real-time information."""
+
+        with DDGS() as ddgs:
+            results = list(ddgs.text(query, max_results=max_results))
+        formatted = []
+        for r in results:
+            formatted.append(f"{r['title']}\n{r['href']}\n{r['body']}\n")
+        return "\n".join(formatted)

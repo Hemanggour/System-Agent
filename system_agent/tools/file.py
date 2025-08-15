@@ -6,7 +6,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from typing import List, Set
 
-from system_agent.config import DEFAULT_IGNORE_DIRS, DEFAULT_IGNORE_FILES, DISABLE_SMART_IGNORE
+from system_agent.config import (
+    DEFAULT_IGNORE_DIRS,
+    DEFAULT_IGNORE_FILES,
+    DISABLE_SMART_IGNORE,
+)
 
 
 class FileManager:
