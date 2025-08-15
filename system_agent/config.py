@@ -7,8 +7,11 @@ load_dotenv()
 
 
 # Model Configuration
-MODEL_NAME = os.getenv("MODEL_NAME", "gemini-2.5-flash-lite")
-MODEL_TEMPERATURE = float(os.getenv("MODEL_TEMPERATURE", "0.7"))
+MODEL_CONFIG = {
+    "provider": os.getenv("MODEL_PROVIDER", "gemini"),
+    "model": os.getenv("MODEL", "gemini-2.0-flash"),
+    "temperature": float(os.getenv("MODEL_TEMPERATURE", "0.7")),
+}
 
 
 # Memory Configuration
@@ -66,7 +69,6 @@ AGENT_MAX_EXECUTION_TIME = int(os.getenv("AGENT_MAX_EXECUTION_TIME", "60"))
 
 # Default directories and files to ignore
 DISABLE_SMART_IGNORE = False
-
 DEFAULT_IGNORE_DIRS = {
     # Virtual environments
     "venv",
@@ -193,10 +195,7 @@ DEFAULT_IGNORE_FILES = {
 def get_all_config() -> Dict[str, Any]:
     """Return all configuration as a dictionary"""
     return {
-        "model": {
-            "name": MODEL_NAME,
-            "temperature": MODEL_TEMPERATURE,
-        },
+        "model_config": MODEL_CONFIG,
         "memory": {
             "window_size": MEMORY_WINDOW_SIZE,
         },

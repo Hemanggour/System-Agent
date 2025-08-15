@@ -7,18 +7,17 @@ from langchain.memory import ConversationBufferWindowMemory
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.schema import HumanMessage
 from langchain.tools import Tool
-from langchain_google_genai import ChatGoogleGenerativeAI
 
 from system_agent.config import (
     AGENT_MAX_EXECUTION_TIME,
     AGENT_MAX_ITERATIONS,
-    VERBOSE,
     AGENT_NAME,
     DISABLE_SMART_IGNORE,
     MEMORY_WINDOW_SIZE,
-    MODEL_NAME,
-    MODEL_TEMPERATURE,
+    MODEL_CONFIG,
+    VERBOSE,
 )
+from system_agent.gen_ai import LLMFactory
 from system_agent.tools.archive import ArchiveManager
 from system_agent.tools.database import DatabaseManager
 from system_agent.tools.email import EmailManager
@@ -31,13 +30,11 @@ from system_agent.tools.web_scraper import WebScraper
 
 
 class AIAgent:
-    """Main AI Agent class with LangChain and Google Gemini integration"""
+    """Main AI Agent class with LangChain integration"""
 
-    def __init__(self, model: str = MODEL_NAME):
-        self.llm = ChatGoogleGenerativeAI(
-            model=model,
-            temperature=MODEL_TEMPERATURE,
-        )
+    def __init__(self):
+        self.llm_factory = LLMFactory(MODEL_CONFIG)
+        self.llm = self.llm_factory.get_llm(MODEL_CONFIG.get("provider"))
 
         # Initialize all managers
         self.file_manager = FileManager()
