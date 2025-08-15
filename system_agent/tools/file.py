@@ -4,6 +4,9 @@ import os
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
+from typing import List, Set
+
+from system_agent.config import DEFAULT_IGNORE_DIRS, DEFAULT_IGNORE_FILES
 
 
 class FileManager:
@@ -209,9 +212,14 @@ class FileManager:
         max_workers=4,
         max_file_size_mb=100,
         use_memory_mapping=True,
+        disable_smart_ignore=False,
+        custom_ignore_patterns=None,
+        additional_ignore_dirs=None,
+        additional_ignore_files=None,
     ):
         """
         High-performance recursive string search using multiple optimization techniques.
+        Now includes smart filtering to ignore common unwanted directories and files.
 
         Args:
             search_string (str): The string to search for
@@ -221,6 +229,10 @@ class FileManager:
             max_workers (int): Number of parallel threads. Defaults to 4.
             max_file_size_mb (int): Skip files larger than this (MB). Defaults to 100.
             use_memory_mapping (bool): Use memory mapping for large files. Defaults to True.
+            disable_smart_ignore (bool): Disable automatic ignore patterns. Defaults to False.
+            custom_ignore_patterns (list): Additional patterns to ignore. Defaults to None.
+            additional_ignore_dirs (list): Additional directory names to ignore. Defaults to None.
+            additional_ignore_files (list): Additional file patterns to ignore. Defaults to None.
 
         Returns:
             list: List of search results
@@ -230,7 +242,11 @@ class FileManager:
             """Search using memory mapping - fastest for larger files."""
             results = []
 
-            file_path = FileManager._normalize_path(file_path.strip())
+            # Normalize path if FileManager is available
+            try:
+                file_path = FileManager._normalize_path(file_path.strip())
+            except Exception:
+                file_path = file_path.strip()
 
             try:
                 with open(file_path, "rb") as f:
@@ -327,6 +343,47 @@ class FileManager:
 
             return results
 
+        def _should_ignore_path(
+            path: str,
+            ignore_dirs: Set[str],
+            ignore_files: Set[str],
+            custom_ignore_patterns: List[str] = None,
+        ) -> bool:
+            """
+            Check if a path should be ignored based on ignore patterns.
+
+            Args:
+                path: File or directory path to check
+                ignore_dirs: Set of directory names to ignore
+                ignore_files: Set of file patterns to ignore
+                custom_ignore_patterns: Additional custom patterns to ignore
+
+            Returns:
+                bool: True if path should be ignored
+            """
+            path_name = os.path.basename(path)
+
+            # Check directory names
+            if os.path.isdir(path) and path_name in ignore_dirs:
+                return True
+
+            # Check file patterns
+            if os.path.isfile(path):
+                for pattern in ignore_files:
+                    if fnmatch.fnmatch(path_name.lower(), pattern.lower()):
+                        return True
+
+            # Check custom patterns
+            if custom_ignore_patterns:
+                for pattern in custom_ignore_patterns:
+                    if fnmatch.fnmatch(path_name.lower(), pattern.lower()):
+                        return True
+                    # Also check if pattern matches any part of the path
+                    if fnmatch.fnmatch(path.lower(), f"*{pattern.lower()}*"):
+                        return True
+
+            return False
+
         if directory is None:
             directory = os.getcwd()
 
@@ -335,14 +392,52 @@ class FileManager:
         if ignore_case:
             search_bytes = search_bytes.lower()
 
-        # Collect all files first
+        # Setup ignore patterns
+        if disable_smart_ignore:
+            ignore_dirs = set(additional_ignore_dirs or [])
+            ignore_files = set(additional_ignore_files or [])
+        else:
+            ignore_dirs = DEFAULT_IGNORE_DIRS.copy()
+            if additional_ignore_dirs:
+                ignore_dirs.update(additional_ignore_dirs)
+            ignore_files = DEFAULT_IGNORE_FILES.copy()
+            if additional_ignore_files:
+                ignore_files.update(additional_ignore_files)
+
+        # Collect all files with smart filtering
         files_to_search = []
         max_file_size_bytes = max_file_size_mb * 1024 * 1024
 
         for root, dirs, files in os.walk(directory):
+            # Filter out ignored directories from dirs list (modifies in-place to prevent walking into them) # noqa
+            dirs[:] = [
+                d
+                for d in dirs
+                if not _should_ignore_path(
+                    os.path.join(root, d),
+                    ignore_dirs,
+                    ignore_files,
+                    custom_ignore_patterns,
+                )
+            ]
+
+            # Skip if current directory should be ignored
+            if _should_ignore_path(
+                root, ignore_dirs, ignore_files, custom_ignore_patterns
+            ):
+                continue
+
             for file in files:
+                file_path = os.path.join(root, file)
+
+                # Skip ignored files
+                if _should_ignore_path(
+                    file_path, ignore_dirs, ignore_files, custom_ignore_patterns
+                ):
+                    continue
+
+                # Check file pattern match
                 if fnmatch.fnmatch(file, file_pattern):
-                    file_path = os.path.join(root, file)
                     try:
                         file_size = os.path.getsize(file_path)
                         if file_size <= max_file_size_bytes:

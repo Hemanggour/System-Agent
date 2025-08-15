@@ -225,10 +225,9 @@ Input format: 'search_string|||directory|||options_json'
 Options JSON can contain:
 - file_pattern: File pattern to match (default: "*")
 - ignore_case: Case-insensitive search (default: true)
-- max_workers: Number of parallel threads (default: 4)
-- max_file_size_mb: Skip files larger than this MB (default: 100)
-- max_results: Maximum results to return (default: 50)
-- use_memory_mapping: Use memory mapping (default: true)
+- custom_ignore_patterns: List of additional patterns to ignore (default: [])
+- additional_ignore_dirs: List of additional directory names to ignore (default: [])
+- additional_ignore_files: List of additional file patterns to ignore (default: [])
 
 Examples:
 - "function"
@@ -244,6 +243,7 @@ Examples:
         """
         Wrapper for search_string_in_files function to work as an AI agent tool.
         Uses the same format as print_search_results for consistent LLM-friendly output.
+        Now includes smart filtering to automatically ignore common unwanted directories and files.
 
         Input format: 'search_string|||directory|||options_json'
         - search_string: The string to search for (required)
@@ -257,12 +257,18 @@ Examples:
         - max_file_size_mb: Skip files larger than this MB (default: 100)
         - max_results: Maximum results to return (default: 50)
         - use_memory_mapping: Use memory mapping (default: true)
+        - disable_smart_ignore: Disable automatic ignore patterns (default: false)
+        - custom_ignore_patterns: List of additional patterns to ignore (default: [])
+        - additional_ignore_dirs: List of additional directory names to ignore (default: [])
+        - additional_ignore_files: List of additional file patterns to ignore (default: [])
 
         Examples:
         - "function"
         - "TODO|||/path/to/project"
         - "error|||/logs|||{\"file_pattern\": \"*.log\", \"ignore_case\": false}"
-        """
+        - "test|||.|||{\"custom_ignore_patterns\": [\"*backup*\", \"*.tmp\"], \"disable_smart_ignore\": false}"
+        - "import|||src|||{\"additional_ignore_dirs\": [\"deprecated\", \"old\"], \"file_pattern\": \"*.py\"}"
+        """  # noqa
         try:
             # Parse input
             parts = input_str.split("|||")
@@ -291,6 +297,10 @@ Examples:
                 "max_workers": options.get("max_workers", 4),
                 "max_file_size_mb": options.get("max_file_size_mb", 100),
                 "use_memory_mapping": options.get("use_memory_mapping", True),
+                "disable_smart_ignore": options.get("disable_smart_ignore", False),
+                "custom_ignore_patterns": options.get("custom_ignore_patterns", []),
+                "additional_ignore_dirs": options.get("additional_ignore_dirs", []),
+                "additional_ignore_files": options.get("additional_ignore_files", []),
             }
 
             max_results = options.get("max_results", 50)
@@ -306,15 +316,29 @@ Examples:
             ):
                 search_options["max_workers"] = 4
 
-            # Perform search
+            # Validate ignore pattern lists
+            for key in [
+                "custom_ignore_patterns",
+                "additional_ignore_dirs",
+                "additional_ignore_files",
+            ]:
+                if not isinstance(search_options[key], list):
+                    search_options[key] = []
+
+            # Perform search with new filtering parameters
             results = self.file_manager.search_string_in_files(
                 search_string=search_string, directory=directory, **search_options
             )
 
             # Handle empty results
             if not results:
-                return f"No matches found for '{search_string}'" + (
-                    f" in directory '{directory}'" if directory else ""
+                filter_info = ""
+                if not search_options["disable_smart_ignore"]:
+                    filter_info = " (smart filtering enabled - ignored common dirs like venv, node_modules, .git)"  # noqa
+                return (
+                    f"No matches found for '{search_string}'"
+                    + (f" in directory '{directory}'" if directory else "")
+                    + filter_info
                 )
 
             # Limit results if needed
@@ -328,8 +352,13 @@ Examples:
             # Format results using print_search_results format
             output_lines = []
 
-            # Header with count
-            output_lines.append(f"Found {original_count} matches:")
+            # Header with count and filtering info
+            header = f"Found {original_count} matches"
+            if not search_options["disable_smart_ignore"]:
+                header += " (smart filtering enabled - ignored common dirs like venv, node_modules, .git)"  # noqa
+            header += ":"
+
+            output_lines.append(header)
             output_lines.append("-" * 50)
 
             # Results in print_search_results format
@@ -353,6 +382,33 @@ Examples:
                 output_lines.append(
                     f"... and {original_count - max_results} more matches"
                 )
+
+            # Add filtering summary if custom patterns were used
+            if (
+                search_options["custom_ignore_patterns"]
+                or search_options["additional_ignore_dirs"]
+                or search_options["additional_ignore_files"]
+            ):
+
+                filter_summary = []
+                if search_options["custom_ignore_patterns"]:
+                    filter_summary.append(
+                        f"Custom ignore patterns: {search_options['custom_ignore_patterns']}"
+                    )
+                if search_options["additional_ignore_dirs"]:
+                    filter_summary.append(
+                        f"Additional ignored dirs: {search_options['additional_ignore_dirs']}"
+                    )
+                if search_options["additional_ignore_files"]:
+                    filter_summary.append(
+                        f"Additional ignored files: {search_options['additional_ignore_files']}"
+                    )
+
+                if filter_summary:
+                    output_lines.append("")
+                    output_lines.append("Filtering applied:")
+                    for summary in filter_summary:
+                        output_lines.append(f"  {summary}")
 
             return "\n".join(output_lines)
 

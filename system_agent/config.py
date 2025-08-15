@@ -63,6 +63,130 @@ AGENT_MAX_ITERATIONS = int(os.getenv("AGENT_MAX_ITERATIONS", "15"))
 AGENT_MAX_EXECUTION_TIME = int(os.getenv("AGENT_MAX_EXECUTION_TIME", "60"))
 
 
+# Default directories and files to ignore
+DEFAULT_IGNORE_DIRS = {
+    # Virtual environments
+    "venv",
+    "env",
+    ".venv",
+    ".env",
+    "virtualenv",
+    "ENV",
+    "env.bak",
+    "venv.bak",
+    # Package managers and dependencies
+    "node_modules",
+    "__pycache__",
+    ".pytest_cache",
+    "pip-wheel-metadata",
+    "site-packages",
+    "dist",
+    "build",
+    "egg-info",
+    ".eggs",
+    "wheels",
+    # Version control
+    ".git",
+    ".hg",
+    ".svn",
+    ".bzr",
+    "_darcs",
+    # IDEs and editors
+    ".vscode",
+    ".idea",
+    ".vs",
+    ".atom",
+    ".sublime-project",
+    ".sublime-workspace",
+    # OS specific
+    ".DS_Store",
+    "Thumbs.db",
+    "__MACOSX",
+    # Logs and temporary files
+    "logs",
+    "log",
+    "tmp",
+    "temp",
+    ".tmp",
+    ".temp",
+    # Documentation builds
+    "_build",
+    "docs/_build",
+    "site",
+    ".docusaurus",
+    # Other common ignore patterns
+    ".mypy_cache",
+    ".tox",
+    ".nox",
+    ".coverage",
+    "htmlcov",
+    ".nyc_output",
+    "coverage",
+    ".sass-cache",
+    ".parcel-cache",
+    ".next",
+    ".nuxt",
+}
+
+DEFAULT_IGNORE_FILES = {
+    # Compiled files
+    "*.pyc",
+    "*.pyo",
+    "*.pyd",
+    "*.class",
+    "*.dll",
+    "*.exe",
+    "*.o",
+    "*.a",
+    "*.lib",
+    "*.so",
+    # Archives
+    "*.zip",
+    "*.tar",
+    "*.tar.gz",
+    "*.rar",
+    "*.7z",
+    # Images (usually not searched)
+    "*.jpg",
+    "*.jpeg",
+    "*.png",
+    "*.gif",
+    "*.bmp",
+    "*.ico",
+    "*.svg",
+    "*.webp",
+    # Videos and audio
+    "*.mp4",
+    "*.avi",
+    "*.mov",
+    "*.mp3",
+    "*.wav",
+    "*.flac",
+    # Documents (can be large)
+    "*.pdf",
+    "*.doc",
+    "*.docx",
+    "*.xls",
+    "*.xlsx",
+    "*.ppt",
+    "*.pptx",
+    # Database files
+    "*.db",
+    "*.sqlite",
+    "*.sqlite3",
+    # Lock files
+    "package-lock.json",
+    "yarn.lock",
+    "Pipfile.lock",
+    "poetry.lock",
+    # Other
+    "*.min.js",
+    "*.min.css",
+    ".gitignore",
+    ".gitkeep",
+}
+
+
 def get_all_config() -> Dict[str, Any]:
     """Return all configuration as a dictionary"""
     return {
@@ -96,6 +220,10 @@ def get_all_config() -> Dict[str, Any]:
             "ping_count": PING_COUNT,
             "download_chunk_size": DOWNLOAD_CHUNK_SIZE,
             "download_timeout": DOWNLOAD_TIMEOUT,
+        },
+        "file": {
+            "ignore_dirs": DEFAULT_IGNORE_DIRS,
+            "ignore_files": DEFAULT_IGNORE_FILES,
         },
         "agent": {
             "name": AGENT_NAME,
