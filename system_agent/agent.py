@@ -12,12 +12,12 @@ from system_agent.config import (
     AGENT_MAX_EXECUTION_TIME,
     AGENT_MAX_ITERATIONS,
     AGENT_NAME,
+    DEFAULT_MODEL_CONFIG,
     DISABLE_SMART_IGNORE,
     MEMORY_WINDOW_SIZE,
-    MODEL_CONFIG,
     VERBOSE,
 )
-from system_agent.gen_ai import LLMFactory
+from system_agent.gen_ai import load_model
 from system_agent.tools.archive import ArchiveManager
 from system_agent.tools.database import DatabaseManager
 from system_agent.tools.email import EmailManager
@@ -30,11 +30,71 @@ from system_agent.tools.web_scraper import WebScraper
 
 
 class AIAgent:
-    """Main AI Agent class with LangChain integration"""
+    """
+    Main AI Agent class with LangChain integration.
 
-    def __init__(self):
-        self.llm_factory = LLMFactory(MODEL_CONFIG)
-        self.llm = self.llm_factory.get_llm(MODEL_CONFIG.get("provider"))
+    This agent wraps around LangChain-compatible chat models (`BaseChatModel`)
+    and provides a unified interface for system control and task execution.
+
+    Args:
+        model (str, optional): Model in the format "provider:modelName"
+            (e.g., "gemini:gemini-2.0-flash", "openai:gpt-4o-mini").
+            If not provided and no `llm` is given, defaults to the value
+            defined in `DEFAULT_MODEL_CONFIG`.
+        llm (BaseChatModel, optional): An existing LangChain `BaseChatModel`
+            instance. If provided, this takes priority over `model`.
+        model_kwargs (dict, optional): Extra keyword arguments for model
+            configuration (e.g., `temperature`, `max_tokens`). If not provided
+            when using `model`, the defaults from `DEFAULT_MODEL_CONFIG["config"]`
+            are applied.
+
+    Supported Models:
+        - Only text-based chat models are supported for now.
+        - Must be instances of LangChain's `BaseChatModel`.
+
+    Environment Variables:
+        These must be set in your `.env` file or environment for authentication.
+        - `OPENAI_API_KEY`      → Required for OpenAI models
+        - `GOOGLE_API_KEY`      → Required for Gemini models
+        - `ANTHROPIC_API_KEY`   → Required for Anthropic models
+
+        Additional optional fields (e.g., for email integration or advanced tools)
+        are documented in the `.env.example` file. Users can remove or change
+        default values as needed.
+
+    Examples:
+        Using a provider + model name with extra kwargs:
+        ```python
+        agent = AIAgent(model="openai:gpt-4o-mini", temperature=0.3)
+        response = agent.run("Summarize the benefits of LangChain.")
+        print(response)
+        ```
+
+        Using a pre-configured LangChain model instance:
+        ```python
+        from langchain_openai import ChatOpenAI
+
+        llm = ChatOpenAI(model="gpt-4o", temperature=0.2)
+        agent = AIAgent(llm=llm)
+        response = agent.run("Explain system AI agents in simple terms.")
+        print(response)
+        ```
+    """
+
+    def __init__(self, model: str = None, llm: object = None, **model_kwargs):
+        if llm:
+            self.llm = llm
+
+        elif model:
+            if not model_kwargs:
+                model_kwargs = DEFAULT_MODEL_CONFIG.get("config")
+            self.llm = load_model(model, **model_kwargs)
+
+        else:
+            self.llm = load_model(
+                model=DEFAULT_MODEL_CONFIG.get("model"),
+                model_kwargs=DEFAULT_MODEL_CONFIG.get("config"),
+            )
 
         # Initialize all managers
         self.file_manager = FileManager()
@@ -55,12 +115,11 @@ class AIAgent:
             k=MEMORY_WINDOW_SIZE, memory_key="chat_history", return_messages=True
         )
 
-        # Create prompt template optimized for Gemini
         self.prompt = ChatPromptTemplate.from_messages(
             [
                 (
                     "system",
-                    f"""You are a helpful AI assistant powered by Google's Gemini model with access to various tools.
+                    f"""You are a helpful AI assistant with access to various tools.
 You are build by: Hemang Gour
 Your name: {AGENT_NAME}
 

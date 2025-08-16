@@ -5,7 +5,6 @@ from system_agent.agent import AIAgent
 def main():
     """Main function to run the AI Agent"""
     print("=== AI Agent System ===")
-    print("Powered by Google Gemini with LangChain")
     print("Type 'quit', 'exit', or 'bye' to stop")
     print("Type 'memory' to see conversation history")
     print("Type 'clear' to clear conversation memory")

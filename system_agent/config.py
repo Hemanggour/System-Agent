@@ -7,10 +7,9 @@ load_dotenv()
 
 
 # Model Configuration
-MODEL_CONFIG = {
-    "provider": os.getenv("MODEL_PROVIDER", "gemini"),
-    "model": os.getenv("MODEL", "gemini-2.0-flash"),
-    "temperature": float(os.getenv("MODEL_TEMPERATURE", "0.7")),
+DEFAULT_MODEL_CONFIG = {
+    "model": os.getenv("MODEL", "gemini:gemini-2.0-flash"),
+    "config": {"temperature": float(os.getenv("MODEL_TEMPERATURE", "0.7"))},
 }
 
 
@@ -195,7 +194,7 @@ DEFAULT_IGNORE_FILES = {
 def get_all_config() -> Dict[str, Any]:
     """Return all configuration as a dictionary"""
     return {
-        "model_config": MODEL_CONFIG,
+        "model_config": DEFAULT_MODEL_CONFIG,
         "memory": {
             "window_size": MEMORY_WINDOW_SIZE,
         },
