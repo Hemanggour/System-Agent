@@ -108,7 +108,7 @@ class AIAgent:
         self.scheduler_manager = SchedulerManager()
 
         # Create tools
-        self.tools = self._create_tools()
+        self.tools = self.__create_tools()
 
         # Create memory with configurable window size
         self.memory = ConversationBufferWindowMemory(
@@ -157,7 +157,7 @@ INSTRUCTIONS:
             max_execution_time=AGENT_MAX_EXECUTION_TIME,
         )
 
-    def _create_tools(self) -> List[Tool]:
+    def __create_tools(self) -> List[Tool]:
         """Create comprehensive tools for the agent"""
         tools = [
             # File Operations
@@ -169,12 +169,12 @@ INSTRUCTIONS:
             Tool(
                 name="write_file",
                 description="Create a new file or overwrite existing file. Input format: 'file_path|||content' (separated by three pipes). Example: 'notes.txt|||Hello World'",  # noqa
-                func=self._write_file_wrapper,
+                func=self.__write_file_wrapper,
             ),
             Tool(
                 name="append_to_file",
                 description="Append content to an existing file. Input format: 'file_path|||content' (separated by three pipes). Example: 'log.txt|||New entry'",  # noqa
-                func=self._append_file_wrapper,
+                func=self.__append_file_wrapper,
             ),
             Tool(
                 name="delete_file",
@@ -205,7 +205,7 @@ INSTRUCTIONS:
             Tool(
                 name="download_file",
                 description="Download file from URL. Input format: 'url|||save_path' (separated by three pipes). Example: 'https://example.com/file.pdf|||file.pdf'",  # noqa
-                func=self._download_file_wrapper,
+                func=self.__download_file_wrapper,
             ),
             # System Operations
             Tool(
@@ -227,24 +227,24 @@ INSTRUCTIONS:
             Tool(
                 name="execute_sqlite_query",
                 description="Execute SQLite query. Input format: 'db_path|||query' (separated by three pipes). Example: 'test.db|||SELECT * FROM users'",  # noqa
-                func=self._sqlite_query_wrapper,
+                func=self.__sqlite_query_wrapper,
             ),
             # Email Operations
             Tool(
                 name="send_email",
                 description="Send email. Input format: 'to_email|||subject|||body|||attachment_path' (attachment optional). Example: 'user@example.com|||Test|||Hello|||'",  # noqa
-                func=self._send_email_wrapper,
+                func=self.__send_email_wrapper,
             ),
             # Archive Operations
             Tool(
                 name="create_zip_archive",
                 description="Create ZIP archive. Input format: 'source_path|||archive_path' (separated by three pipes). Example: 'my_folder|||backup.zip'",  # noqa
-                func=self._create_zip_wrapper,
+                func=self.__create_zip_wrapper,
             ),
             Tool(
                 name="extract_zip_archive",
                 description="Extract ZIP archive. Input format: 'archive_path|||extract_path' (separated by three pipes). Example: 'backup.zip|||./extracted'",  # noqa
-                func=self._extract_zip_wrapper,
+                func=self.__extract_zip_wrapper,
             ),
             # Network Operations
             Tool(
@@ -256,7 +256,7 @@ INSTRUCTIONS:
             Tool(
                 name="calculate_file_hash",
                 description="Calculate file hash. Input format: 'file_path|||hash_type' (hash_type optional, defaults to md5). Example: 'file.txt|||sha256'",  # noqa
-                func=self._calculate_hash_wrapper,
+                func=self.__calculate_hash_wrapper,
             ),
             Tool(
                 name="scan_directory_for_duplicates",
@@ -267,7 +267,7 @@ INSTRUCTIONS:
             Tool(
                 name="schedule_task",
                 description="Schedule a task. Input format: 'task_name|||command|||schedule_time' (separated by three pipes). Example: 'daily_backup|||cp file.txt backup.txt|||daily at 2pm'",  # noqa
-                func=self._schedule_task_wrapper,
+                func=self.__schedule_task_wrapper,
             ),
             Tool(
                 name="list_scheduled_tasks",
@@ -294,7 +294,7 @@ Examples:
 - "function"
 - "TODO|||/path/to/project"
 - "error|||/logs|||{\"file_pattern\": \"*.log\", \"ignore_case\": false}\"""",  # noqa
-                func=self._search_string_in_files_wrapper,
+                func=self.__search_string_in_files_wrapper,
             ),
             Tool(
                 name="duckduckgo_search",
@@ -305,7 +305,7 @@ Examples:
 
         return tools
 
-    def _search_string_in_files_wrapper(self, input_str: str) -> str:
+    def __search_string_in_files_wrapper(self, input_str: str) -> str:
         """
         Wrapper for search_string_in_files function to work as an AI agent tool.
         Uses the same format as print_search_results for consistent LLM-friendly output.
@@ -484,7 +484,7 @@ Examples:
             return f"Error during search: {str(e)}"
 
     # Wrapper functions for tools that need input parsing
-    def _write_file_wrapper(self, input_str: str) -> str:
+    def __write_file_wrapper(self, input_str: str) -> str:
         """Wrapper for write_file tool"""
         try:
             parts = input_str.split("|||", 1)
@@ -495,7 +495,7 @@ Examples:
         except Exception as e:
             return f"Error parsing input: {str(e)}"
 
-    def _append_file_wrapper(self, input_str: str) -> str:
+    def __append_file_wrapper(self, input_str: str) -> str:
         """Wrapper for append_file tool"""
         try:
             parts = input_str.split("|||", 1)
@@ -506,7 +506,7 @@ Examples:
         except Exception as e:
             return f"Error parsing input: {str(e)}"
 
-    def _download_file_wrapper(self, input_str: str) -> str:
+    def __download_file_wrapper(self, input_str: str) -> str:
         """Wrapper for download_file tool"""
         try:
             parts = input_str.split("|||", 1)
@@ -517,7 +517,7 @@ Examples:
         except Exception as e:
             return f"Error parsing input: {str(e)}"
 
-    def _sqlite_query_wrapper(self, input_str: str) -> str:
+    def __sqlite_query_wrapper(self, input_str: str) -> str:
         """Wrapper for sqlite_query tool"""
         try:
             parts = input_str.split("|||", 1)
@@ -528,7 +528,7 @@ Examples:
         except Exception as e:
             return f"Error parsing input: {str(e)}"
 
-    def _send_email_wrapper(self, input_str: str) -> str:
+    def __send_email_wrapper(self, input_str: str) -> str:
         """Wrapper for send_email tool"""
         try:
             parts = input_str.split("|||")
@@ -544,7 +544,7 @@ Examples:
         except Exception as e:
             return f"Error parsing input: {str(e)}"
 
-    def _create_zip_wrapper(self, input_str: str) -> str:
+    def __create_zip_wrapper(self, input_str: str) -> str:
         """Wrapper for create_zip_archive tool"""
         try:
             parts = input_str.split("|||", 1)
@@ -555,7 +555,7 @@ Examples:
         except Exception as e:
             return f"Error parsing input: {str(e)}"
 
-    def _extract_zip_wrapper(self, input_str: str) -> str:
+    def __extract_zip_wrapper(self, input_str: str) -> str:
         """Wrapper for extract_zip_archive tool"""
         try:
             parts = input_str.split("|||", 1)
@@ -566,7 +566,7 @@ Examples:
         except Exception as e:
             return f"Error parsing input: {str(e)}"
 
-    def _calculate_hash_wrapper(self, input_str: str) -> str:
+    def __calculate_hash_wrapper(self, input_str: str) -> str:
         """Wrapper for calculate_file_hash tool"""
         try:
             parts = input_str.split("|||")
@@ -576,7 +576,7 @@ Examples:
         except Exception as e:
             return f"Error parsing input: {str(e)}"
 
-    def _schedule_task_wrapper(self, input_str: str) -> str:
+    def __schedule_task_wrapper(self, input_str: str) -> str:
         """Wrapper for schedule_task tool"""
         try:
             parts = input_str.split("|||")

@@ -16,9 +16,8 @@ def load_model(model: str, **model_kwargs):
         common_params["top_p"] = model_kwargs["top_p"]
 
     # provider-specific extras
-    if "safety_settings" in model_kwargs:  
+    if "safety_settings" in model_kwargs:
         model_kwargs["safety_settings"] = model_kwargs["safety_settings"]
-
 
     if provider == "openai":
         try:
@@ -28,11 +27,7 @@ def load_model(model: str, **model_kwargs):
                 "langchain-openai is not installed. Install it with:\n"
                 "pip install langchain-openai"
             )
-        return ChatOpenAI(
-            model=model_name,
-            **common_params,
-            model_kwargs=model_kwargs
-        )
+        return ChatOpenAI(model=model_name, **common_params, model_kwargs=model_kwargs)
 
     elif provider == "gemini":
         try:
@@ -43,9 +38,7 @@ def load_model(model: str, **model_kwargs):
                 "pip install langchain-google-genai"
             )
         return ChatGoogleGenerativeAI(
-            model=model_name,
-            **common_params,
-            model_kwargs=model_kwargs
+            model=model_name, **common_params, model_kwargs=model_kwargs
         )
 
     elif provider == "anthropic":
@@ -57,9 +50,7 @@ def load_model(model: str, **model_kwargs):
                 "pip install langchain-anthropic"
             )
         return ChatAnthropic(
-            model=model_name,
-            **common_params,
-            model_kwargs=model_kwargs
+            model=model_name, **common_params, model_kwargs=model_kwargs
         )
 
     else:
