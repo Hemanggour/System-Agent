@@ -14,6 +14,10 @@ from system_agent.config import (
     AGENT_NAME,
     DEFAULT_MODEL_CONFIG,
     DISABLE_SMART_IGNORE,
+    GOOGLE_CREDENTIALS_FILE,
+    GOOGLE_SCOPES,
+    GOOGLE_TOKEN_FILE,
+    GOOGLE_WORKSPACE_ENABLED,
     MEMORY_WINDOW_SIZE,
     VERBOSE,
 )
@@ -22,6 +26,9 @@ from system_agent.tools.archive import ArchiveManager
 from system_agent.tools.database import DatabaseManager
 from system_agent.tools.email import EmailManager
 from system_agent.tools.file import FileManager
+from system_agent.tools.google_workspace.google_workspace_manager import (
+    GoogleWorkspaceManager,
+)
 from system_agent.tools.network import NetworkManager
 from system_agent.tools.scheduler import SchedulerManager
 from system_agent.tools.security import SecurityManager
@@ -106,6 +113,13 @@ class AIAgent:
         self.network_manager = NetworkManager()
         self.security_manager = SecurityManager()
         self.scheduler_manager = SchedulerManager()
+
+        self.google_workspace_manager = GoogleWorkspaceManager(
+            enabled=GOOGLE_WORKSPACE_ENABLED,
+            credentials_path=GOOGLE_CREDENTIALS_FILE,
+            token_path=GOOGLE_TOKEN_FILE,
+            scopes=GOOGLE_SCOPES,
+        )
 
         # Create tools
         self.tools = self.__create_tools()
@@ -230,11 +244,11 @@ INSTRUCTIONS:
                 func=self.__sqlite_query_wrapper,
             ),
             # Email Operations
-            Tool(
-                name="send_email",
-                description="Send email. Input format: 'to_email|||subject|||body|||attachment_path' (attachment optional). Example: 'user@example.com|||Test|||Hello|||'",  # noqa
-                func=self.__send_email_wrapper,
-            ),
+            # Tool(
+            #     name="send_email",
+            #     description="Send email. Input format: 'to_email|||subject|||body|||attachment_path' (attachment optional). Example: 'user@example.com|||Test|||Hello|||'",  # noqa
+            #     func=self.__send_email_wrapper,
+            # ),
             # Archive Operations
             Tool(
                 name="create_zip_archive",
@@ -302,6 +316,9 @@ Examples:
                 func=self.web_scraper.duckduckgo_search,
             ),
         ]
+
+        if self.google_workspace_manager:
+            tools.extend(self.google_workspace_manager.get_tools())
 
         return tools
 

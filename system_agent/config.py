@@ -191,6 +191,30 @@ DEFAULT_IGNORE_FILES = {
 }
 
 
+# GOOGLE WORKSPACE CONFIGURATIONS
+
+# Whether to enable Google Workspace integration
+GOOGLE_WORKSPACE_ENABLED = (
+    os.getenv("GOOGLE_WORKSPACE_ENABLED", "False").lower() == "true"
+)  # default: disabled
+
+# Path to the credentials.json file (only needed if enabled)
+GOOGLE_CREDENTIALS_FILE = "credentials.json"
+
+# Path where token.pickle will be saved
+GOOGLE_TOKEN_FILE = "token.pickle"
+
+# Default scopes (minimal access until user changes them)
+GOOGLE_SCOPES = [
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/documents",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/calendar",
+    "https://www.googleapis.com/auth/gmail.send",
+    "https://www.googleapis.com/auth/gmail.readonly",
+]
+
+
 def get_all_config() -> Dict[str, Any]:
     """Return all configuration as a dictionary"""
     return {
@@ -232,5 +256,11 @@ def get_all_config() -> Dict[str, Any]:
             "verbose": VERBOSE,
             "max_iterations": AGENT_MAX_ITERATIONS,
             "max_execution_time": AGENT_MAX_EXECUTION_TIME,
+        },
+        "google_workspace": {
+            "google_workspace_enabled": GOOGLE_WORKSPACE_ENABLED,
+            "google_credentials_file": GOOGLE_CREDENTIALS_FILE,
+            "google_token_file": GOOGLE_TOKEN_FILE,
+            "google_scopes": GOOGLE_SCOPES,
         },
     }
