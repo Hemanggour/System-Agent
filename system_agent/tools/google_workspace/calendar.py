@@ -480,42 +480,42 @@ class CalendarManager:
             Tool(
                 name="create_calendar_event",
                 description="Create calendar event with multiple attendees and optional Meet link",
-                func=lambda params: self.create_event(**params),
+                func=lambda params: self.create_event(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="read_calendar_events",
                 description="Read calendar events within specific date range",
-                func=lambda params: self.read_events(**params),
+                func=lambda params: self.read_events(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="update_calendar_event",
                 description="Update existing calendar event details",
-                func=lambda params: self.update_event(**params),
+                func=lambda params: self.update_event(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="delete_calendar_event",
                 description="Delete calendar event by ID",
-                func=lambda params: self.delete_event(**params),
+                func=lambda params: self.delete_event(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="create_new_calendar",
                 description="Create a new calendar with name and description",
-                func=lambda params: self.create_calendar(**params),
+                func=lambda params: self.create_calendar(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="list_all_calendars",
                 description="List all accessible calendars with details",
-                func=lambda params: self.list_calendars(**params),
+                func=lambda params: self.list_calendars(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="share_calendar_with_users",
                 description="Share calendar with multiple users with role permissions",
-                func=lambda params: self.share_calendar(**params),
+                func=lambda params: self.share_calendar(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="check_free_busy_status",
                 description="Check free/busy status for multiple users in time range",
-                func=lambda params: self.get_free_busy(**params),
+                func=lambda params: self.get_free_busy(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
         ]
         return tools

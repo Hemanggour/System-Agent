@@ -383,32 +383,32 @@ class DriveManager:
             Tool(
                 name="upload_file_to_drive",
                 description="Upload file to Google Drive with optional folder location",
-                func=lambda params: self.upload_file(**params),
+                func=lambda params: self.upload_file(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="download_file_from_drive",
                 description="Download file from Google Drive by ID or name",
-                func=lambda params: self.download_file(**params),
+                func=lambda params: self.download_file(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="share_drive_file",
-                description="Share file with multiple users with specific role permissions",
-                func=lambda params: self.share_file(**params),
+                description="Share file with multiple users with specific role permissions\n{file_id: str, emails: List[str], role: str = \"reader\", notify: bool = True}",
+                func=lambda params: self.share_file(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="create_drive_folder",
                 description="Create a new folder in Google Drive",
-                func=lambda params: self.create_folder(**params),
+                func=lambda params: self.create_folder(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="list_drive_files",
                 description="List files in Drive or specific folder with optional type filter",
-                func=lambda params: self.list_files(**params),
+                func=lambda params: self.list_files(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="move_drive_file",
                 description="Move file to a different folder in Google Drive",
-                func=lambda params: self.move_file(**params),
+                func=lambda params: self.move_file(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
         ]
         return tools

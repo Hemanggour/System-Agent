@@ -334,22 +334,22 @@ class GmailManager:
             Tool(
                 name="send_email",
                 description="Send email to multiple recipients with optional CC/BCC",
-                func=lambda params: self.send_email(**params),
+                func=lambda params: self.send_email(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="send_email_with_attachment",
                 description="Send email with file attachment to multiple recipients",
-                func=lambda params: self.send_email_with_attachment(**params),
+                func=lambda params: self.send_email_with_attachment(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="read_emails",
                 description="Read and search emails with optional query filter",
-                func=lambda params: self.read_emails(**params),
+                func=lambda params: self.read_emails(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="download_attachment",
                 description="Download specific attachment from an email",
-                func=lambda params: self.download_attachment(**params),
+                func=lambda params: self.download_attachment(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
         ]
         return tools

@@ -89,18 +89,18 @@ class GoogleWorkspaceManager:
         tools = []
 
         if self.gmail_manager:
-            tools.extend(self.gmail_manager.get_tools_wrappers())
+            tools.extend(self.gmail_manager.get_tools())
 
         if self.calendar_manager:
-            tools.extend(self.calendar_manager.get_tools_wrappers())
+            tools.extend(self.calendar_manager.get_tools())
 
         if self.drive_manager:
-            tools.extend(self.drive_manager.get_tools_wrappers())
+            tools.extend(self.drive_manager.get_tools())
 
         if self.documents_manager:
-            tools.extend(self.documents_manager.get_tools_wrappers())
+            tools.extend(self.documents_manager.get_tools())
 
         if self.spread_sheets_manager:
-            tools.extend(self.spread_sheets_manager.get_tools_wrappers())
+            tools.extend(self.spread_sheets_manager.get_tools())
 
         return tools
