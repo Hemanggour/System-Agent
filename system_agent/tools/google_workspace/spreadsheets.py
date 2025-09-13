@@ -439,27 +439,27 @@ class SpreadSheetsManager:
         tools = [
             Tool(
                 name="create_spreadsheet",
-                description="Create a new Google Spreadsheet with optional sheet names",
+                description='Create a new Google Spreadsheet. JSON: {"title": "str", "sheet_names": ["str"]}',
                 func=lambda params: self.create_spreadsheet(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="read_spreadsheet_data",
-                description="Read data from spreadsheet by ID or name with range",
+                description='Read data from spreadsheet. JSON: {"spreadsheet_id": "str", "spreadsheet_name": "str", "range_name": "str"}',
                 func=lambda params: self.read_data(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="write_spreadsheet_data",
-                description="Write data to spreadsheet (replace or append mode)",
+                description='Write data to spreadsheet. JSON: {"spreadsheet_id": "str", "data": [[any]], "range_name": "str", "append": true/false}',
                 func=lambda params: self.write_data(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="add_spreadsheet_formula",
-                description="Add formula to specific cell or range in spreadsheet",
+                description='Add formula to spreadsheet. JSON: {"spreadsheet_id": "str", "range_name": "str", "formula": "str"}',
                 func=lambda params: self.add_formula(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="format_spreadsheet_cells",
-                description="Format cells with background colors and text styling",
+                description='Format spreadsheet cells. JSON: {"spreadsheet_id": "str", "range_name": "str", "format": {"backgroundColor": {"red": float, "green": float, "blue": float}, "textFormat": {"bold": bool, "italic": bool, "fontSize": int}}}',
                 func=lambda params: self.format_cells(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
         ]

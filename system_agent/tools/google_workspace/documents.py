@@ -354,12 +354,12 @@ class DocumentsManager:
         return [
             Tool(
                 name="create_google_doc",
-                description='Create a new Google Doc. JSON input: {"title":"str"}',
+                description='Create a new Google Doc. JSON: {"title":"str"}',
                 func=lambda params: self.create_document(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
                 name="read_google_doc",
-                description='Read Google Doc. JSON input: {"document_id":"str"} or {"document_name":"str"}',
+                description='Read Google Doc. JSON: {"document_id":"str"} or {"document_name":"str"}',
                 func=lambda params: self.read_document(**(params if isinstance(params, dict) else __import__("json").loads(params))),
             ),
             Tool(
