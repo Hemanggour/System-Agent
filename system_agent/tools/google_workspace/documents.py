@@ -34,7 +34,9 @@ class DocumentsManager:
         doc_id = doc.get("documentId")
         return {"document_id": doc_id, "title": title}
 
-    def read_document(self, document_id: Optional[str] = None, document_name: Optional[str] = None) -> Dict[str, Any]:
+    def read_document(
+        self, document_id: Optional[str] = None, document_name: Optional[str] = None
+    ) -> Dict[str, Any]:
         if not document_id and not document_name:
             raise ValueError("Provide either document_id or document_name")
 
@@ -46,12 +48,12 @@ class DocumentsManager:
         return {"document_id": document_id, "content": text}
 
     def edit_document(
-            self,
-            document_id: str,
-            content: str,
-            append: bool = False,
-            markdown: bool = False,
-        ) -> Dict[str, Any]:
+        self,
+        document_id: str,
+        content: str,
+        append: bool = False,
+        markdown: bool = False,
+    ) -> Dict[str, Any]:
         """
         Replace or append content to a Google Doc safely.
 
@@ -92,13 +94,27 @@ class DocumentsManager:
             delete_start = 1
             delete_end = max(1, last_end_index - 1)
             if delete_end > delete_start:
-                requests.append({
-                    "deleteContentRange": {"range": {"startIndex": delete_start, "endIndex": delete_end}}
-                })
+                requests.append(
+                    {
+                        "deleteContentRange": {
+                            "range": {
+                                "startIndex": delete_start,
+                                "endIndex": delete_end,
+                            }
+                        }
+                    }
+                )
 
         # Insert new text
         if plain_text:
-            requests.append({"insertText": {"location": {"index": insertion_index}, "text": plain_text}})
+            requests.append(
+                {
+                    "insertText": {
+                        "location": {"index": insertion_index},
+                        "text": plain_text,
+                    }
+                }
+            )
 
         # Apply styles from Markdown
         for r in style_ranges:
@@ -121,36 +137,44 @@ class DocumentsManager:
                 continue
 
             fields = ",".join(text_style.keys())
-            requests.append({
-                "updateTextStyle": {
-                    "range": {"startIndex": start_index, "endIndex": end_index},
-                    "textStyle": text_style,
-                    "fields": fields,
+            requests.append(
+                {
+                    "updateTextStyle": {
+                        "range": {"startIndex": start_index, "endIndex": end_index},
+                        "textStyle": text_style,
+                        "fields": fields,
+                    }
                 }
-            })
+            )
 
         if not requests:
             return {"document_id": document_id, "status": "no_changes"}
 
         # Execute batchUpdate safely
         try:
-            result = self.service.documents().batchUpdate(documentId=document_id, body={"requests": requests}).execute()
+            self.service.documents().batchUpdate(
+                documentId=document_id, body={"requests": requests}
+            ).execute()  # noqa: E501
         except HttpError as e:
             msg = str(e)
             # Optional: chunk large requests
-            if "Request too large" in msg or "exceeds" in msg or "Request had too many" in msg:
+            if (
+                "Request too large" in msg
+                or "exceeds" in msg
+                or "Request had too many" in msg
+            ):
                 try:
                     for i in range(0, len(requests), self.MAX_BATCH_REQUESTS):
-                        chunk = requests[i:i + self.MAX_BATCH_REQUESTS]
-                        self.service.documents().batchUpdate(documentId=document_id, body={"requests": chunk}).execute()
-                    result = {"status": "ok_chunked"}
+                        chunk = requests[i : i + self.MAX_BATCH_REQUESTS]
+                        self.service.documents().batchUpdate(
+                            documentId=document_id, body={"requests": chunk}
+                        ).execute()
                 except HttpError as e2:
                     raise RuntimeError(f"Batch update failed when chunking: {e2}")
             else:
                 raise RuntimeError(f"Batch update failed: {e}")
 
         return {"document_id": document_id, "status": "updated"}
-
 
     # -------------------------
     # Helpers & parsers
@@ -159,7 +183,7 @@ class DocumentsManager:
         """
         Apply styles by explicit offsets: user can call this if they know start/end indexes.
         Example: format_text(doc_id, text="Hello", bold=True) -> finds first occurrence and applies style safely.
-        """
+        """  # noqa
         # find text position in the document
         doc = self.service.documents().get(documentId=document_id).execute()
         whole = self._extract_text_from_document(doc)
@@ -175,7 +199,10 @@ class DocumentsManager:
         if styles.get("italic"):
             text_style["italic"] = True
         if "font_size" in styles:
-            text_style["fontSize"] = {"magnitude": int(styles["font_size"]), "unit": "PT"}
+            text_style["fontSize"] = {
+                "magnitude": int(styles["font_size"]),
+                "unit": "PT",
+            }
 
         if not text_style:
             return {"document_id": document_id, "status": "nothing_to_apply"}
@@ -188,15 +215,21 @@ class DocumentsManager:
                 "fields": fields,
             }
         }
-        self.service.documents().batchUpdate(documentId=document_id, body={"requests": [req]}).execute()
+        self.service.documents().batchUpdate(
+            documentId=document_id, body={"requests": [req]}
+        ).execute()
         return {"document_id": document_id, "status": "formatted"}
 
     def _find_document_id(self, document_name: str) -> str:
-        resp = self.drive_service.files().list(
-            q=f"name='{document_name}' and mimeType='application/vnd.google-apps.document'",
-            fields="files(id, name)",
-            pageSize=5,
-        ).execute()
+        resp = (
+            self.drive_service.files()
+            .list(
+                q=f"name='{document_name}' and mimeType='application/vnd.google-apps.document'",
+                fields="files(id, name)",
+                pageSize=5,
+            )
+            .execute()
+        )
         files = resp.get("files", [])
         if not files:
             raise ValueError(f"Document named '{document_name}' not found.")
@@ -208,7 +241,9 @@ class DocumentsManager:
         if not text:
             return
         requests = [{"insertText": {"location": {"index": 1}, "text": text}}]
-        self.service.documents().batchUpdate(documentId=document_id, body={"requests": requests}).execute()
+        self.service.documents().batchUpdate(
+            documentId=document_id, body={"requests": requests}
+        ).execute()
 
     def _extract_text_from_document(self, document: Dict[str, Any]) -> str:
         """Extract plain text from the Google Docs document structure (best-effort)."""
@@ -227,13 +262,15 @@ class DocumentsManager:
     # -------------------------
     # Markdown parsing
     # -------------------------
-    def _parse_markdown_to_plain_and_styles(self, markdown_text: str) -> Tuple[str, List[Dict[str, Any]]]:
+    def _parse_markdown_to_plain_and_styles(
+        self, markdown_text: str
+    ) -> Tuple[str, List[Dict[str, Any]]]:
         """
         Parse Markdown -> returns (plain_text, style_ranges)
         style_ranges is a list of dicts: {"start": int, "end": int, "style": {"bold": True, "italic": True, "fontSize": 18, "code": True}}
         Offsets are 0-based relative to the returned plain_text.
         Requires markdown-it-py for best results. If not installed, returns plain text with no styles.
-        """
+        """  # noqa
         if not MarkdownIt:
             # fallback: strip markdown markers (basic) and return plain text without ranges
             stripped = re.sub(r"\*\*(.*?)\*\*", r"\1", markdown_text)
@@ -328,11 +365,14 @@ class DocumentsManager:
                     pop_style("code")
                 elif ttype == "fence":  # code fence -> treat as block
                     # insert as-is and mark monospace (we'll mark entire block as code style)
+                    pos = None
                     start_pos = pos
                     content = token.content + "\n"
                     plain.append(content)
                     pos += len(content)
-                    ranges.append({"start": start_pos, "end": pos, "style": {"code": True}})
+                    ranges.append(
+                        {"start": start_pos, "end": pos, "style": {"code": True}}
+                    )
                 elif ttype == "inline":
                     # dive into children
                     if token.children:
@@ -355,21 +395,45 @@ class DocumentsManager:
             Tool(
                 name="create_google_doc",
                 description='Create a new Google Doc. JSON: {"title":"str"}',
-                func=lambda params: self.create_document(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                func=lambda params: self.create_document(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
             Tool(
                 name="read_google_doc",
-                description='Read Google Doc. JSON: {"document_id":"str"} or {"document_name":"str"}',
-                func=lambda params: self.read_document(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Read Google Doc. JSON: {"document_id":"str"} or {"document_name":"str"}',  # noqa
+                func=lambda params: self.read_document(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
             Tool(
                 name="edit_google_doc",
-                description='Edit Google Doc. JSON: {"document_id":"str","content":"str","append":true/false,"markdown":true/false}',
-                func=lambda params: self.edit_document(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Edit Google Doc. JSON: {"document_id":"str","content":"str","append":true/false,"markdown":true/false}',  # noqa
+                func=lambda params: self.edit_document(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
             Tool(
                 name="format_google_doc_text",
-                description='Format text by literal search. JSON: {"document_id":"str","text":"str","bold":true/false,"italic":true/false,"font_size":int}',
-                func=lambda params: self.format_text(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Format text by literal search. JSON: {"document_id":"str","text":"str","bold":true/false,"italic":true/false,"font_size":int}',  # noqa
+                func=lambda params: self.format_text(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
         ]

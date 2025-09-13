@@ -479,43 +479,91 @@ class CalendarManager:
         tools = [
             Tool(
                 name="create_calendar_event",
-                description='Create calendar event. JSON: {"attendee_emails": ["str"], "summary": "str", "start_time": "str", "end_time": "str", "description": "str", "location": "str", "create_meet": true/false}',
-                func=lambda params: self.create_event(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Create calendar event. JSON: {"attendee_emails": ["str"], "summary": "str", "start_time": "str", "end_time": "str", "description": "str", "location": "str", "create_meet": true/false}',  # noqa
+                func=lambda params: self.create_event(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
             Tool(
                 name="read_calendar_events",
-                description='Read calendar events. JSON: {"start_date": "str", "end_date": "str", "max_results": int}',
-                func=lambda params: self.read_events(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Read calendar events. JSON: {"start_date": "str", "end_date": "str", "max_results": int}',  # noqa
+                func=lambda params: self.read_events(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
             Tool(
                 name="update_calendar_event",
-                description='Update calendar event. JSON: {"event_id": "str", "updates": {"summary": "str", "start_time": "str", "end_time": "str", "description": "str", "location": "str"}}',
-                func=lambda params: self.update_event(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Update calendar event. JSON: {"event_id": "str", "updates": {"summary": "str", "start_time": "str", "end_time": "str", "description": "str", "location": "str"}}',  # noqa
+                func=lambda params: self.update_event(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
             Tool(
                 name="delete_calendar_event",
-                description='Delete calendar event. JSON: {"event_id": "str"}',
-                func=lambda params: self.delete_event(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Delete calendar event. JSON: {"event_id": "str"}',  # noqa
+                func=lambda params: self.delete_event(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
             Tool(
                 name="create_new_calendar",
-                description='Create a new calendar. JSON: {"title": "str", "description": "str"}',
-                func=lambda params: self.create_calendar(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Create a new calendar. JSON: {"title": "str", "description": "str"}',  # noqa
+                func=lambda params: self.create_calendar(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
             Tool(
                 name="list_all_calendars",
-                description='List all accessible calendars. JSON: {"min_access_role": "str"}',
-                func=lambda params: self.list_calendars(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='List all accessible calendars. JSON: {"min_access_role": "str"}',  # noqa
+                func=lambda params: self.list_calendars(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
             Tool(
                 name="share_calendar_with_users",
-                description='Share calendar with users. JSON: {"calendar_id": "str", "emails": ["str"], "role": "str", "notifications": true/false}',
-                func=lambda params: self.share_calendar(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Share calendar with users. JSON: {"calendar_id": "str", "emails": ["str"], "role": "str", "notifications": true/false}',  # noqa
+                func=lambda params: self.share_calendar(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
             Tool(
                 name="check_free_busy_status",
-                description='Check free/busy status. JSON: {"emails": ["str"], "start_time": "str", "end_time": "str", "calendar_id": "str"}',
-                func=lambda params: self.get_free_busy(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Check free/busy status. JSON: {"emails": ["str"], "start_time": "str", "end_time": "str", "calendar_id": "str"}',  # noqa
+                func=lambda params: self.get_free_busy(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
         ]
         return tools

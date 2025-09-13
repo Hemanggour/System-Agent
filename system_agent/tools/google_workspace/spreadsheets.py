@@ -439,28 +439,58 @@ class SpreadSheetsManager:
         tools = [
             Tool(
                 name="create_spreadsheet",
-                description='Create a new Google Spreadsheet. JSON: {"title": "str", "sheet_names": ["str"]}',
-                func=lambda params: self.create_spreadsheet(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Create a new Google Spreadsheet. JSON: {"title": "str", "sheet_names": ["str"]}',  # noqa
+                func=lambda params: self.create_spreadsheet(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
             Tool(
                 name="read_spreadsheet_data",
-                description='Read data from spreadsheet. JSON: {"spreadsheet_id": "str", "spreadsheet_name": "str", "range_name": "str"}',
-                func=lambda params: self.read_data(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Read data from spreadsheet. JSON: {"spreadsheet_id": "str", "spreadsheet_name": "str", "range_name": "str"}',  # noqa
+                func=lambda params: self.read_data(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
             Tool(
                 name="write_spreadsheet_data",
-                description='Write data to spreadsheet. JSON: {"spreadsheet_id": "str", "data": [[any]], "range_name": "str", "append": true/false}',
-                func=lambda params: self.write_data(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Write data to spreadsheet. JSON: {"spreadsheet_id": "str", "data": [[any]], "range_name": "str", "append": true/false}',  # noqa
+                func=lambda params: self.write_data(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
             Tool(
                 name="add_spreadsheet_formula",
-                description='Add formula to spreadsheet. JSON: {"spreadsheet_id": "str", "range_name": "str", "formula": "str"}',
-                func=lambda params: self.add_formula(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Add formula to spreadsheet. JSON: {"spreadsheet_id": "str", "range_name": "str", "formula": "str"}',  # noqa
+                func=lambda params: self.add_formula(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
             Tool(
                 name="format_spreadsheet_cells",
-                description='Format spreadsheet cells. JSON: {"spreadsheet_id": "str", "range_name": "str", "format": {"backgroundColor": {"red": float, "green": float, "blue": float}, "textFormat": {"bold": bool, "italic": bool, "fontSize": int}}}',
-                func=lambda params: self.format_cells(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Format spreadsheet cells. JSON: {"spreadsheet_id": "str", "range_name": "str", "format": {"backgroundColor": {"red": float, "green": float, "blue": float}, "textFormat": {"bold": bool, "italic": bool, "fontSize": int}}}',  # noqa
+                func=lambda params: self.format_cells(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
         ]
         return tools

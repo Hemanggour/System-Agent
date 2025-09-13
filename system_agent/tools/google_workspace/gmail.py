@@ -333,23 +333,47 @@ class GmailManager:
         tools = [
             Tool(
                 name="send_email",
-                description='Send email. JSON: {"to_emails": ["str"], "subject": "str", "body": "str", "cc_emails": ["str"], "bcc_emails": ["str"], "is_html": true/false}',
-                func=lambda params: self.send_email(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Send email. JSON: {"to_emails": ["str"], "subject": "str", "body": "str", "cc_emails": ["str"], "bcc_emails": ["str"], "is_html": true/false}',  # noqa
+                func=lambda params: self.send_email(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
             Tool(
                 name="send_email_with_attachment",
-                description='Send email with attachment. JSON: {"to_emails": ["str"], "subject": "str", "body": "str", "file_path": "str", "cc_emails": ["str"]}',
-                func=lambda params: self.send_email_with_attachment(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Send email with attachment. JSON: {"to_emails": ["str"], "subject": "str", "body": "str", "file_path": "str", "cc_emails": ["str"]}',  # noqa
+                func=lambda params: self.send_email_with_attachment(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
             Tool(
                 name="read_emails",
-                description='Read and search emails. JSON: {"query": "str", "max_results": int, "label_ids": ["str"]}',
-                func=lambda params: self.read_emails(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Read and search emails. JSON: {"query": "str", "max_results": int, "label_ids": ["str"]}',  # noqa
+                func=lambda params: self.read_emails(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
             Tool(
                 name="download_attachment",
-                description='Download email attachment. JSON: {"message_id": "str", "attachment_id": "str", "file_name": "str"}',
-                func=lambda params: self.download_attachment(**(params if isinstance(params, dict) else __import__("json").loads(params))),
+                description='Download email attachment. JSON: {"message_id": "str", "attachment_id": "str", "file_name": "str"}',  # noqa
+                func=lambda params: self.download_attachment(
+                    **(
+                        params
+                        if isinstance(params, dict)
+                        else __import__("json").loads(params)
+                    )
+                ),
             ),
         ]
         return tools
