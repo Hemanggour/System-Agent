@@ -1,4 +1,4 @@
-# ThinkPad AI Agent
+# AI System Agent
 
 A powerful and extensible AI system agent with LangChain integration that can perform various system operations, file management, web scraping, and more through natural language commands.
 
