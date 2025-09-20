@@ -160,6 +160,86 @@ WEB_REQUEST_TIMEOUT=10  # Request timeout in seconds
 - `psutil` - System monitoring
 - `ddgs` - DuckDuckGo search
 
+### Google Workspace Dependencies
+To use Google Workspace features, install the following additional packages:
+```bash
+pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib
+```
+
+## 🔄 Google Workspace Integration
+
+The agent includes powerful Google Workspace integration with the following features:
+
+### Available Services
+- **Gmail**: Send and read emails, manage labels
+- **Google Calendar**: Create and manage events, list calendars
+- **Google Drive**: Upload, download, and manage files
+- **Google Docs**: Create and edit documents
+- **Google Sheets**: Read and write spreadsheet data
+
+### Setup Instructions
+
+1. **Enable Google Workspace API**
+   - Go to the [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a new project or select an existing one
+   - Enable the following APIs:
+     - Gmail API
+     - Google Calendar API
+     - Google Drive API
+     - Google Docs API
+     - Google Sheets API
+
+2. **Configure OAuth Consent Screen**
+   - In the Google Cloud Console, go to "APIs & Services" > "OAuth consent screen"
+   - Set the user type to "External" and create
+   - Fill in the required app information
+   - Add the following scopes under "Scopes":
+     - `https://www.googleapis.com/auth/gmail.send`
+     - `https://www.googleapis.com/auth/gmail.readonly`
+     - `https://www.googleapis.com/auth/calendar`
+     - `https://www.googleapis.com/auth/drive`
+     - `https://www.googleapis.com/auth/documents`
+     - `https://www.googleapis.com/auth/spreadsheets`
+   - Add test users (email addresses that will use the app)
+   - Save and continue
+
+3. **Create OAuth Credentials**
+   - Go to "APIs & Services" > "Credentials"
+   - Click "Create Credentials" > "OAuth client ID"
+   - Select "Desktop app" as the application type
+   - Download the credentials JSON file and save it as `credentials.json` in your project root
+
+4. **Enable Google Workspace in Agent**
+   Update your `.env` file with:
+   ```
+   # Google Workspace Configuration
+   GOOGLE_WORKSPACE_ENABLED=True
+   ```
+
+5. **First Run Authentication**
+   On first run, the agent will open a browser window for OAuth authentication. 
+   - Sign in with your Google account
+   - Grant the requested permissions
+   - The token will be saved to `token.pickle` for future use
+
+### Example Usage
+
+```python
+# After setting up, the agent will automatically have access to Google Workspace tools
+# Example: Create a new Google Doc
+response = agent.run("Create a new Google Doc named 'Project Plan' with some initial content")
+print(response)
+```
+
+### Security Notes
+- Never commit `credentials.json` or `token.pickle` to version control
+- Add these files to your `.gitignore`:
+  ```
+  credentials.json
+  token.pickle
+  ```
+- The token is stored locally and can be revoked at any time from your Google Account settings
+
 ### Optional Dependencies
 - `langchain-ollama` - Required for using local models with Ollama
   ```bash
