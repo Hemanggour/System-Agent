@@ -6,6 +6,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from typing import List, Set
 
+from langchain.tools import StructuredTool
+
 from system_agent.config import (
     DEFAULT_IGNORE_DIRS,
     DEFAULT_IGNORE_FILES,
@@ -86,6 +88,7 @@ class FileManager:
                 return "Error: No file path provided"
 
             file_path = file_path.strip()
+            file_path = FileManager._normalize_path(file_path)
 
             directory = os.path.dirname(file_path)
             if directory and not os.path.exists(directory):
@@ -96,17 +99,42 @@ class FileManager:
 
             if os.path.exists(file_path):
                 file_size = os.path.getsize(file_path)
-                action = "appended to" if mode == "a" else "created/wrote to"
-                return f"Successfully {action} file '{file_path}' (Size: {file_size} bytes)"
-            else:
-                return f"Error: Failed to create file '{file_path}'"
-
+                return f"Successfully wrote {file_size} bytes to '{file_path}'"
+            return f"File '{file_path}' created but could not verify size"
         except PermissionError:
             return f"Error: Permission denied to write to '{file_path}'"
         except OSError as e:
             return f"Error: Cannot write to '{file_path}' - {str(e)}"
         except Exception as e:
             return f"Error writing to file '{file_path}': {str(e)}"
+
+    @staticmethod
+    def append_file(file_path: str, content: str) -> str:
+        """Append content to a file (creates file if it doesn't exist)"""
+        try:
+            if not file_path or file_path.strip() == "":
+                return "Error: No file path provided"
+
+            file_path = file_path.strip()
+            file_path = FileManager._normalize_path(file_path)
+
+            # Create directory if it doesn't exist
+            directory = os.path.dirname(file_path)
+            if directory and not os.path.exists(directory):
+                os.makedirs(directory, exist_ok=True)
+
+            with open(file_path, "a", encoding="utf-8") as f:
+                f.write(content)
+
+            if os.path.exists(file_path):
+                file_size = os.path.getsize(file_path)
+                return f"Successfully appended {len(content)} bytes to '{file_path}'. New size: {file_size} bytes"  # noqa
+            return f"Content appended to '{file_path}' but could not verify size"
+
+        except PermissionError:
+            return f"Error: Permission denied to write to '{file_path}'"
+        except Exception as e:
+            return f"Error appending to file '{file_path}': {str(e)}"
 
     @staticmethod
     def delete_file(file_path: str) -> str:
@@ -116,6 +144,7 @@ class FileManager:
                 return "Error: No file path provided"
 
             file_path = file_path.strip()
+            file_path = FileManager._normalize_path(file_path)
 
             if not os.path.exists(file_path):
                 return f"Error: File '{file_path}' does not exist"
@@ -487,3 +516,143 @@ class FileManager:
                         results.extend(file_results)
 
         return results
+
+    def get_tools(self) -> List[StructuredTool]:
+        """Return a list of StructuredTool objects for file operations."""
+        return [
+            StructuredTool.from_function(
+                name="read_file",
+                func=self.read_file,
+                args_schema={
+                    "file_path": {
+                        "type": "string",
+                        "description": "Path to the file to read",
+                    }
+                },
+                description="""Read content from a file.
+                Example:
+                {
+                    "file_path": "path/to/file.txt"
+                }""",
+            ),
+            StructuredTool.from_function(
+                name="write_file",
+                func=self.write_file,
+                args_schema={
+                    "file_path": {
+                        "type": "string",
+                        "description": "Path where the file will be written",
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "Content to write to the file",
+                    },
+                    "mode": {
+                        "type": "string",
+                        "description": "Write mode: 'w' for write (default), 'a' for append",
+                        "default": "w",
+                    },
+                },
+                description="""Write content to a file. Creates file if it doesn't exist.
+                Example:
+                {
+                    "file_path": "path/to/file.txt",
+                    "content": "Hello, World!",
+                    "mode": "w"
+                }""",
+            ),
+            StructuredTool.from_function(
+                name="append_file",
+                func=self.append_file,
+                args_schema={
+                    "file_path": {
+                        "type": "string",
+                        "description": "Path to the file to append to",
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "Content to append to the file",
+                    },
+                },
+                description="""Append content to an existing file.
+                Example:
+                {
+                    "file_path": "path/to/file.txt",
+                    "content": "Additional content"
+                }""",
+            ),
+            StructuredTool.from_function(
+                name="list_files",
+                func=self.list_files,
+                args_schema={
+                    "directory": {
+                        "type": "string",
+                        "description": "Directory path to list contents of (default: current directory)",  # noqa
+                        "default": ".",
+                    }
+                },
+                description="""List files and directories in a directory.
+                Example:
+                {
+                    "directory": "path/to/directory"
+                }""",
+            ),
+            StructuredTool.from_function(
+                name="search_string_in_files",
+                func=self.search_string_in_files,
+                args_schema={
+                    "search_string": {
+                        "type": "string",
+                        "description": "Text to search for in files",
+                    },
+                    "directory": {
+                        "type": "string",
+                        "description": "Directory to search in (default: current directory)",
+                        "default": ".",
+                    },
+                    "file_extensions": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "File extensions to include (e.g., ['.py', '.txt'])",
+                        "default": [],
+                    },
+                    "case_sensitive": {
+                        "type": "boolean",
+                        "description": "Whether the search is case sensitive",
+                        "default": False,
+                    },
+                    "max_file_size_mb": {
+                        "type": "number",
+                        "description": "Maximum file size in MB to search",
+                        "default": 5,
+                    },
+                    "exclude_dirs": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Directories to exclude from search",
+                        "default": ["venv", ".git", "__pycache__"],
+                    },
+                    "additional_ignore_files": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Additional files to exclude from search",
+                        "default": [],
+                    },
+                },
+                description="""Search for a string in files within a directory.
+                Example (full parameters):
+                {
+                    "search_string": "function",
+                    "directory": "./src",
+                    "file_extensions": [".py", ".txt"],
+                    "case_sensitive": false,
+                    "max_file_size_mb": 5,
+                    "exclude_dirs": ["venv", ".git"],
+                    "additional_ignore_files": []
+                }
+                Simple usage:
+                {
+                    "search_string": "function"
+                }""",
+            ),
+        ]
