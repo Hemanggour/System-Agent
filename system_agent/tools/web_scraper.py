@@ -1,6 +1,9 @@
+from typing import List
+
 import requests
 from bs4 import BeautifulSoup
 from ddgs import DDGS
+from langchain.tools import StructuredTool
 
 from system_agent.config import (
     WEB_CONTENT_LIMIT,
@@ -15,6 +18,14 @@ class WebScraper:
 
     @staticmethod
     def scrape_url(url: str) -> str:
+        """Scrape content from a URL.
+
+        Args:
+            url: The URL to scrape content from
+
+        Returns:
+            str: The scraped content or an error message
+        """
         """Scrape content from a URL"""
         try:
             headers = {"User-Agent": WEB_USER_AGENT}
@@ -42,6 +53,14 @@ class WebScraper:
 
     @staticmethod
     def extract_links(url: str) -> str:
+        """Extract all links from a webpage.
+
+        Args:
+            url: The URL to extract links from
+
+        Returns:
+            str: A formatted string containing the links or an error message
+        """
         """Extract all links from a webpage"""
         try:
             headers = {
@@ -68,11 +87,87 @@ class WebScraper:
 
     @staticmethod
     def duckduckgo_search(query: str, max_results: int = 5) -> str:
-        """Search the web using DuckDuckGo for real-time information."""
+        """Search the web using DuckDuckGo.
 
-        with DDGS() as ddgs:
-            results = list(ddgs.text(query, max_results=max_results))
-        formatted = []
-        for r in results:
-            formatted.append(f"{r['title']}\n{r['href']}\n{r['body']}\n")
-        return "\n".join(formatted)
+        Args:
+            query: The search query
+            max_results: Maximum number of results to return (default: 5)
+
+        Returns:
+            str: Formatted search results
+        """
+        """Search the web using DuckDuckGo for real-time information."""
+        try:
+            # Ensure max_results is an integer
+            max_results = int(max_results) if max_results else 5
+            max_results = max(1, min(max_results, 20))  # Clamp between 1 and 20
+
+            with DDGS() as ddgs:
+                results = list(ddgs.text(query, max_results=max_results))
+
+            if not results:
+                return "No results found for the given query."
+
+            formatted = []
+            for r in results[:max_results]:  # Ensure we don't exceed max_results
+                title = r.get("title", "No title")
+                href = r.get("href", "#")
+                body = r.get("body", "No description available")
+                formatted.append(f"{title}\n{href}\n{body}\n")
+
+            return "\n".join(formatted)
+
+        except Exception as e:
+            return f"Error performing search: {str(e)}"
+
+    def get_tools(self) -> List[StructuredTool]:
+        """Return a list of StructuredTool objects for web scraping operations."""
+        return [
+            StructuredTool.from_function(
+                name="scrape_url",
+                func=self.scrape_url,
+                args_schema={
+                    "url": {
+                        "type": "string",
+                        "description": "The URL to scrape content from",
+                    }
+                },
+                description="""Scrape content from a URL.
+                Example:
+                {
+                    "url": "https://example.com"
+                }""",
+            ),
+            StructuredTool.from_function(
+                name="extract_links",
+                func=self.extract_links,
+                args_schema={
+                    "url": {
+                        "type": "string",
+                        "description": "The URL to extract links from",
+                    }
+                },
+                description="""Extract all links from a webpage.
+                Example:
+                {
+                    "url": "https://example.com"
+                }""",
+            ),
+            StructuredTool.from_function(
+                name="duckduckgo_search",
+                func=self.duckduckgo_search,
+                args_schema={
+                    "query": {"type": "string", "description": "Search query"},
+                    "max_results": {
+                        "type": "integer",
+                        "description": "Maximum number of results to return",
+                    },
+                },
+                description="""Search the web using DuckDuckGo.
+                Example:
+                {
+                    "query": "search terms",
+                    "max_results": 5
+                }""",
+            ),
+        ]
