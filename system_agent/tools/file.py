@@ -679,5 +679,4 @@ class FileManager:
                 },
                 description="Get detailed information about a file",
             ),
-            
         ]
