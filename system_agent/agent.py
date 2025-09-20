@@ -72,12 +72,15 @@ class AIAgent:
 
         Using a pre-configured LangChain model instance:
         ```python
-        from langchain_openai import ChatOpenAI
+        from langchain_ollama import ChatOllama
 
-        llm = ChatOpenAI(model="gpt-4o", temperature=0.2)
+        # Use any ollama model you have pulled, e.g., "llama3", "mistral", "gemma"
+        llm = ChatOllama(model="llama3", temperature=0.2)
+
         agent = AIAgent(llm=llm)
         response = agent.run("Explain system AI agents in simple terms.")
         print(response)
+
         ```
     """
 

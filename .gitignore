@@ -1,5 +1,8 @@
 __pycache__/
 .venv/
 docs/
+test/
 
 .env
+credentials.json
+token.pickle
