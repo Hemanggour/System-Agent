@@ -1,5 +1,9 @@
 # AI System Agent
 
+## ⚠️ Note
+The Google Workspace integration is **still under development** and may contain **bugs or unexpected behavior**.  
+If you encounter any issues or notice anything not working as expected, please **create an issue** in this repository to help us improve it.
+
 A powerful and extensible AI system agent with LangChain integration that can perform various system operations, file management, web scraping, and more through natural language commands.
 
 ## 🚀 Features
