@@ -172,6 +172,7 @@ class FileManager:
                 directory = "."
 
             directory = directory.strip()
+            directory = FileManager._normalize_path(directory)
 
             if not os.path.exists(directory):
                 return f"Error: Directory '{directory}' does not exist"
@@ -218,6 +219,7 @@ class FileManager:
                 return "Error: No file path provided"
 
             file_path = file_path.strip()
+            file_path = FileManager._normalize_path(file_path)
 
             if not os.path.exists(file_path):
                 return f"Error: '{file_path}' does not exist"
@@ -655,4 +657,27 @@ class FileManager:
                     "search_string": "function"
                 }""",
             ),
+            StructuredTool.from_function(
+                name="delete_file",
+                func=self.delete_file,
+                args_schema={
+                    "file_path": {
+                        "type": "string",
+                        "description": "Path to the file to delete",
+                    },
+                },
+                description="Delete a file at a given path",
+            ),
+            StructuredTool.from_function(
+                name="get_file_info",
+                func=self.get_file_info,
+                args_schema={
+                    "file_path": {
+                        "type": "string",
+                        "description": "Path to the file to get info for",
+                    },
+                },
+                description="Get detailed information about a file",
+            ),
+            
         ]
