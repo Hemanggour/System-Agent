@@ -164,6 +164,7 @@ class WebScraper:
                     },
                 },
                 description="""Search the web using DuckDuckGo.
+                You have to make a better query to get better results.
                 Example:
                 {
                     "query": "search terms",
