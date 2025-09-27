@@ -160,6 +160,9 @@ class AIAgent:
 - After that you have to mark the task as completed.
 - Do not perform unrelated actions without user instruction.
 
+## Output Format:
+- Return the output in proper markdowm format that is readable for the user.
+
 ## Environment Context
 - Working directory: `${self.working_directory}`
 - Today’s date: `${self.current_time}`

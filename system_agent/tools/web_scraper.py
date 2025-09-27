@@ -86,37 +86,48 @@ class WebScraper:
             return f"Error extracting links from '{url}': {str(e)}"
 
     @staticmethod
-    def duckduckgo_search(query: str, max_results: int = 5) -> str:
-        """Search the web using DuckDuckGo.
-
-        Args:
-            query: The search query
-            max_results: Maximum number of results to return (default: 5)
-
-        Returns:
-            str: Formatted search results
+    def duckduckgo_search(
+        query: str, max_results: int = 5, search_type: str = "text"
+    ) -> str:
         """
-        """Search the web using DuckDuckGo for real-time information."""
+        Search DuckDuckGo for text, images, videos, or news.
+        """
         try:
-            # Ensure max_results is an integer
-            max_results = int(max_results) if max_results else 5
-            max_results = max(1, min(max_results, 20))  # Clamp between 1 and 20
-
+            max_results = max(1, min(int(max_results), 20))  # Clamp between 1 and 20
             with DDGS() as ddgs:
-                results = list(ddgs.text(query, max_results=max_results))
+                search_type = search_type.lower()
+                if search_type == "images":
+                    results = list(ddgs.images(query, max_results=max_results))
+                    return "\n".join(
+                        [f"{i+1}. {r['image']}" for i, r in enumerate(results)]
+                    )
 
-            if not results:
-                return "No results found for the given query."
+                elif search_type == "videos":
+                    results = list(ddgs.videos(query, max_results=max_results))
+                    return "\n".join(
+                        [
+                            f"{i+1}. {r['title']}\n{r['url']}"
+                            for i, r in enumerate(results)
+                        ]
+                    )
 
-            formatted = []
-            for r in results[:max_results]:  # Ensure we don't exceed max_results
-                title = r.get("title", "No title")
-                href = r.get("href", "#")
-                body = r.get("body", "No description available")
-                formatted.append(f"{title}\n{href}\n{body}\n")
+                elif search_type == "news":
+                    results = list(ddgs.news(query, max_results=max_results))
+                    return "\n".join(
+                        [
+                            f"{i+1}. {r['title']}\n{r['url']}"
+                            for i, r in enumerate(results)
+                        ]
+                    )
 
-            return "\n".join(formatted)
-
+                else:  # text search
+                    results = list(ddgs.text(query, max_results=max_results))
+                    return "\n".join(
+                        [
+                            f"{i+1}. {r.get('title', 'No title')}\n{r.get('href', '#')}\n{r.get('body', 'No description')}"  # noqa
+                            for i, r in enumerate(results)
+                        ]
+                    )
         except Exception as e:
             return f"Error performing search: {str(e)}"
 
@@ -162,13 +173,19 @@ class WebScraper:
                         "type": "integer",
                         "description": "Maximum number of results to return",
                     },
+                    "search_type": {
+                        "type": "string",
+                        "description": "Type of search (text, images, videos, news)",
+                    },
                 },
                 description="""Search the web using DuckDuckGo.
                 You have to make a better query to get better results.
+                You can search for text, images, videos, or news.
                 Example:
                 {
                     "query": "search terms",
-                    "max_results": 5
+                    "max_results": 5,
+                    "search_type": "text"
                 }""",
             ),
         ]
